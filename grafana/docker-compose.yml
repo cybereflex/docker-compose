@@ -1,0 +1,55 @@
+services:
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 9100:9100
+
+  prometheus:
+    build:
+      context: ./prometheus
+      dockerfile: Dockerfile
+    image: prometheus:v3.1.0
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - prometheus-data:/prometheus
+    ports:
+      - 9090:9090
+    networks:
+      - default-network
+
+  alert-manager:
+    build:
+      context: ./alert_manager
+      dockerfile: Dockerfile
+    image: alertmanager:v0.27.0
+    container_name: alert-manager
+    volumes:
+      - alert-manager-data:/alertmanager
+    networks:
+      - default-network
+    ports:
+      - 9093:9093
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      GF_SECURITY_ADMIN_USER: grafana
+      GF_SECURITY_ADMIN_PASSWORD: grafana
+    networks:
+      - default-network
+
+volumes:
+  prometheus-data:
+  alert-manager-data:
+
+networks:
+  default-network:

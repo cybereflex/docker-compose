@@ -1,0 +1,71 @@
+services:
+  redis-cluster-01:
+    image: redis:7.4.1
+    container_name: redis-cluster-01
+    restart: unless-stopped
+    user: redis
+    ports:
+      - 36379:36379
+    volumes:
+      - cluster-01-data:/data
+    networks:
+      - default-network
+    command:
+      - "redis-server"
+      - "--port 36379"
+      - "--databases 1"
+      - "--appendonly yes"
+      - "--protected-mode no"
+      - "--cluster-enabled yes"
+      - "--cluster-announce-ip redis-cluster-01"
+      - "--cluster-announce-port 36379"
+
+  redis-cluster-02:
+    image: redis:7.4.1
+    container_name: redis-cluster-02
+    restart: unless-stopped
+    user: redis
+    ports:
+      - 36380:36380
+    volumes:
+      - cluster-02-data:/data
+    networks:
+      - default-network
+    command:
+      - "redis-server"
+      - "--port 36380"
+      - "--databases 1"
+      - "--appendonly yes"
+      - "--protected-mode no"
+      - "--cluster-enabled yes"
+      - "--cluster-announce-ip redis-cluster-02"
+      - "--cluster-announce-port 36380"
+
+  redis-cluster-03:
+    image: redis:7.4.1
+    container_name: redis-cluster-03
+    restart: unless-stopped
+    user: redis
+    ports:
+      - 36381:36381
+    volumes:
+      - cluster-03-data:/data
+    networks:
+      - default-network
+    command:
+      - "redis-server"
+      - "--port 36381"
+      - "--databases 1"
+      - "--appendonly yes"
+      - "--protected-mode no"
+      - "--cluster-enabled yes"
+      - "--cluster-announce-ip redis-cluster-03"
+      - "--cluster-announce-port 36381"
+
+networks:
+  default-network:
+
+volumes:
+  cluster-01-data:
+  cluster-02-data:
+  cluster-03-data:

@@ -1,0 +1,140 @@
+services:
+  kafka-kraft-01:
+    image: apache/kafka:4.1.1
+    container_name: kafka-kraft-01
+    hostname: kafka-kraft-01
+    restart: unless-stopped
+    ports:
+      - 9091:9091
+    networks:
+      - default-network
+    volumes:
+      - kraft-01-data:/var/lib/kafka/data
+      - kraft-01-secrets:/etc/kafka/secrets
+      - kraft-01-conf:/mnt/shared/config
+    environment:
+      CLUSTER_ID: kraft-docker
+      KAFKA_NODE_ID: 1
+      KAFKA_BROKER_ID: 1
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: CONTROLLER://:9090,PLAINTEXT://:9091
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-kraft-01:9091
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-kraft-01:9090,2@kafka-kraft-02:9090,3@kafka-kraft-03:9090
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "9091"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+
+  kafka-kraft-02:
+    image: apache/kafka:4.1.1
+    container_name: kafka-kraft-02
+    hostname: kafka-kraft-02
+    restart: unless-stopped
+    ports:
+      - 9092:9092
+    networks:
+      - default-network
+    volumes:
+      - kraft-02-data:/var/lib/kafka/data
+      - kraft-02-secrets:/etc/kafka/secrets
+      - kraft-02-conf:/mnt/shared/config
+    environment:
+      CLUSTER_ID: kraft-docker
+      KAFKA_NODE_ID: 2
+      KAFKA_BROKER_ID: 2
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: CONTROLLER://:9090,PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-kraft-02:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-kraft-01:9090,2@kafka-kraft-02:9090,3@kafka-kraft-03:9090
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "9092"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  kafka-kraft-03:
+    image: apache/kafka:4.1.1
+    container_name: kafka-kraft-03
+    hostname: kafka-kraft-03
+    restart: unless-stopped
+    ports:
+      - 9093:9093
+    networks:
+      - default-network
+    volumes:
+      - kraft-03-data:/var/lib/kafka/data
+      - kraft-03-secrets:/etc/kafka/secrets
+      - kraft-03-conf:/mnt/shared/config
+    environment:
+      CLUSTER_ID: kraft-docker
+      KAFKA_NODE_ID: 3
+      KAFKA_BROKER_ID: 3
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: CONTROLLER://:9090,PLAINTEXT://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-kraft-03:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-kraft-01:9090,2@kafka-kraft-02:9090,3@kafka-kraft-03:9090
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "9093"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  kafbat-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    restart: unless-stopped
+    container_name: kafbat-ui
+    depends_on:
+      kafka-kraft-01:
+        condition: service_healthy
+      kafka-kraft-02:
+        condition: service_healthy
+      kafka-kraft-03:
+        condition: service_healthy
+    networks:
+      - default-network
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: true
+      KAFKA_CLUSTERS_0_NAME: kraft-docker
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-kraft-01:9091,kafka-kraft-02:9092,kafka-kraft-03:9093
+
+networks:
+  default-network:
+
+volumes:
+  kraft-01-data:
+  kraft-01-secrets:
+  kraft-01-conf:
+  kraft-02-data:
+  kraft-02-secrets:
+  kraft-02-conf:
+  kraft-03-data:
+  kraft-03-secrets:
+  kraft-03-conf:

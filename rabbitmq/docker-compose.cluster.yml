@@ -1,0 +1,127 @@
+services:
+  rabbitmq-cluster-01:
+    image: rabbitmq:4.0.5-management
+    container_name: rabbitmq-cluster-01
+    restart: unless-stopped
+    ports:
+      - 15671:15672
+      - 5671:5672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_ERLANG_COOKIE: secret
+      RABBITMQ_NODENAME: rabbitmq@rabbitmq-cluster-01
+    command: >
+      bash -c "
+        rabbitmq-plugins enable rabbitmq_mqtt && 
+        rabbitmq-plugins enable rabbitmq_stream &&
+        rabbitmq-server
+      "
+    volumes:
+      - data-01:/var/lib/rabbitmq
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  rabbitmq-cluster-02:
+    image: rabbitmq:4.0.5-management
+    container_name: rabbitmq-cluster-02
+    restart: unless-stopped
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_ERLANG_COOKIE: secret
+      RABBITMQ_NODENAME: rabbitmq@rabbitmq-cluster-02
+    command: >
+      bash -c "
+        rabbitmq-plugins enable rabbitmq_mqtt && 
+        rabbitmq-plugins enable rabbitmq_stream &&
+        rabbitmq-server
+      "
+    volumes:
+      - data-02:/var/lib/rabbitmq
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  rabbitmq-cluster-03:
+    image: rabbitmq:4.0.5-management
+    container_name: rabbitmq-cluster-03
+    restart: unless-stopped
+    ports:
+      - 15673:15672
+      - 5673:5672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_ERLANG_COOKIE: secret
+      RABBITMQ_NODENAME: rabbitmq@rabbitmq-cluster-03
+    command: >
+      bash -c "
+        rabbitmq-plugins enable rabbitmq_mqtt && 
+        rabbitmq-plugins enable rabbitmq_stream &&
+        rabbitmq-server
+      "
+    volumes:
+      - data-03:/var/lib/rabbitmq
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  rabbitmq-cluster-setup:
+    image: rabbitmq:4.0.5-management
+    container_name: rabbitmq-cluster-setup
+    depends_on:
+      rabbitmq-cluster-01:
+        condition: service_healthy
+      rabbitmq-cluster-02:
+        condition: service_healthy
+      rabbitmq-cluster-03:
+        condition: service_healthy
+    environment:
+      RABBITMQ_ERLANG_COOKIE: secret
+    command: >
+      bash -c "
+        sleep 5 &&
+
+        rabbitmqctl -n rabbitmq@rabbitmq-cluster-02 stop_app &&
+        rabbitmqctl -n rabbitmq@rabbitmq-cluster-02 join_cluster rabbitmq@rabbitmq-cluster-01 &&
+        rabbitmqctl -n rabbitmq@rabbitmq-cluster-02 start_app &&
+
+        rabbitmqctl -n rabbitmq@rabbitmq-cluster-03 stop_app &&
+        rabbitmqctl -n rabbitmq@rabbitmq-cluster-03 join_cluster rabbitmq@rabbitmq-cluster-01 &&
+        rabbitmqctl -n rabbitmq@rabbitmq-cluster-03 start_app &&
+
+        echo 'initial rabbitmq cluster success...'
+      "
+    networks:
+      - default-network
+    volumes:
+      - data-setup:/var/lib/rabbitmq
+
+volumes:
+  data-01:
+  data-02:
+  data-03:
+  data-setup:
+
+networks:
+  default-network:

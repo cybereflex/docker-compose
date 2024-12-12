@@ -1,0 +1,23 @@
+listen_addresses = '*'
+
+# MODULES
+shared_preload_libraries = 'decoderbufs'
+
+# REPLICATION
+wal_level = logical 
+max_wal_senders = 4 
+max_replication_slots = 4 
+max_connections = 100
+autovacuum_worker_slots = 16
+shared_buffers = 128MB
+lc_messages = 'en_US.utf8'
+lc_monetary = 'en_US.utf8'
+lc_numeric = 'en_US.utf8'
+lc_time = 'en_US.utf8'
+datestyle = 'iso, mdy'
+default_text_search_config = 'pg_catalog.english'
+timezone = 'Etc/UTC'
+log_timezone = 'Etc/UTC'
+dynamic_shared_memory_type = posix
+min_wal_size = 80MB
+max_wal_size = 1GB

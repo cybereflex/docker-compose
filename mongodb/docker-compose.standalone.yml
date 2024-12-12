@@ -1,0 +1,54 @@
+services:
+  mongo:
+    image: mongo:8.0.3
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    volumes:
+      - data:/data/db
+      - conf:/data/configdb
+      - logs:/data/log
+    networks:
+      - default-network
+    healthcheck:
+      test: |
+        mongosh "mongodb://localhost:27017/admin" --quiet --eval "
+          try {
+            const result = db.runCommand({ ping: 1 });
+            if (result.ok === 1) {
+              quit(0);
+            } else {
+              quit(1);
+            }
+          } catch (e) {
+              quit(1);
+          }  
+        "
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  mongo-express:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: mongo-express
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_BASICAUTH_USERNAME: mongo
+      ME_CONFIG_BASICAUTH_PASSWORD: mongo
+    ports:
+      - 8081:8081
+    networks:
+      - default-network
+volumes:
+  conf:
+  data:
+  logs:
+
+networks:
+  default-network:

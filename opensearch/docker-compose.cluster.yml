@@ -1,0 +1,93 @@
+services:
+  opensearch-cluster-01:
+    container_name: opensearch-cluster-01
+    image: opensearchproject/opensearch:3.4.0
+    environment:
+      node.name: opensearch-cluster-01
+      cluster.name: opensearch-cluster-docker
+      discovery.seed_hosts: opensearch-cluster-01,opensearch-cluster-02
+      cluster.initial_cluster_manager_nodes: opensearch-cluster-01,opensearch-cluster-02
+      bootstrap.memory_lock: true
+      DISABLE_SECURITY_PLUGIN: true
+      DISABLE_INSTALL_DEMO_CONFIG: true
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - data-01:/usr/share/opensearch/data
+    ports:
+      - 19200:9200
+      - 19600:9600
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "localhost:9200"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
+      start_period: 1m
+
+  opensearch-cluster-02:
+    container_name: opensearch-cluster-02
+    image: opensearchproject/opensearch:3.4.0
+    environment:
+      node.name: opensearch-cluster-02
+      cluster.name: opensearch-cluster-docker
+      discovery.seed_hosts: opensearch-cluster-01,opensearch-cluster-02
+      cluster.initial_cluster_manager_nodes: opensearch-cluster-01,opensearch-cluster-02
+      bootstrap.memory_lock: true
+      DISABLE_SECURITY_PLUGIN: true
+      DISABLE_INSTALL_DEMO_CONFIG: true
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - data-02:/usr/share/opensearch/data
+    ports:
+      - 29200:9200
+      - 29600:9600
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "localhost:9200"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
+      start_period: 1m
+
+  opensearch-cluster-dashboard:
+    image: opensearchproject/opensearch-dashboards:3.4.0
+    container_name: opensearch-cluster-dashboard
+    depends_on:
+      opensearch-cluster-01:
+        condition: service_healthy
+      opensearch-cluster-02:
+        condition: service_healthy
+    ports:
+      - 5601:5601
+    environment:
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+      OPENSEARCH_HOSTS:
+        [
+          "http://opensearch-cluster-01:9200",
+          "http://opensearch-cluster-02:9200",
+        ]
+    networks:
+      - default-network
+
+networks:
+  default-network:
+
+volumes:
+  data-01:
+  data-02:

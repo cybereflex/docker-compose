@@ -1,0 +1,159 @@
+services:
+  mongo-replica-primary:
+    image: mongo:8.0.3
+    container_name: mongo-replica-primary
+    restart: unless-stopped
+    command:
+      - mongod
+      - "--replSet=DefaultReplicaSet"
+      - "--bind_ip_all"
+    ports:
+      - 27017:27017
+    volumes:
+      - primary-data:/data/db
+      - primary-conf:/data/configdb
+      - primary-logs:/data/log
+    networks:
+      - default-network
+    healthcheck:
+      test: |
+        mongosh "mongodb://localhost:27017/admin" --quiet --eval "
+          try {
+            const result = db.runCommand({ ping: 1 });
+            if (result.ok === 1) {
+              quit(0);
+            } else {
+              quit(1);
+            }
+          } catch (e) {
+              quit(1);
+          }  
+        "
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  mongo-replica-01:
+    image: mongo:8.0.3
+    container_name: mongo-replica-01
+    restart: unless-stopped
+    command:
+      - mongod
+      - "--replSet=DefaultReplicaSet"
+      - "--bind_ip_all"
+    ports:
+      - 27018:27017
+    volumes:
+      - replica-01-data:/data/db
+      - replica-01-conf:/data/configdb
+      - replica-01-logs:/data/log
+    networks:
+      - default-network
+    healthcheck:
+      test: |
+        mongosh "mongodb://localhost:27017/admin" --quiet --eval "
+          try {
+            const result = db.runCommand({ ping: 1 });
+            if (result.ok === 1) {
+              quit(0);
+            } else {
+              quit(1);
+            }
+          } catch (e) {
+              quit(1);
+          }  
+        "
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+
+  mongo-replica-02:
+    image: mongo:8.0.3
+    container_name: mongo-replica-02
+    restart: unless-stopped
+    command:
+      - mongod
+      - "--replSet=DefaultReplicaSet"
+      - "--bind_ip_all"
+    ports:
+      - 27019:27017
+    volumes:
+      - replica-02-data:/data/db
+      - replica-02-conf:/data/configdb
+      - replica-02-logs:/data/log
+    networks:
+      - default-network
+    healthcheck:
+      test: |
+        mongosh "mongodb://localhost:27017/admin" --quiet --eval "
+          try {
+            const result = db.runCommand({ ping: 1 });
+            if (result.ok === 1) {
+              quit(0);
+            } else {
+              quit(1);
+            }
+          } catch (e) {
+              quit(1);
+          }  
+        "
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  mongo-replica-setup:
+    build: 
+      context: ./mongo-replica-setup
+      dockerfile: Dockerfile
+    image: mongo-replica-setup:8.0.3
+    container_name: mongo-replica-setup
+    depends_on:
+      mongo-replica-primary:
+        condition: service_healthy
+      mongo-replica-01:
+        condition: service_healthy
+      mongo-replica-02:
+        condition: service_healthy
+    volumes:
+      - setup-data:/data/db
+    networks:
+      - default-network
+
+  mongo-replica-express:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: mongo-replica-express
+    restart: unless-stopped
+    depends_on:
+      mongo-replica-primary:
+        condition: service_healthy
+      mongo-replica-01:
+        condition: service_healthy
+      mongo-replica-02:
+        condition: service_healthy
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo-replica-primary,mongo-replica-01,mongo-replica-02
+      ME_CONFIG_BASICAUTH_USERNAME: mongo
+      ME_CONFIG_BASICAUTH_PASSWORD: mongo
+    ports:
+      - 8081:8081
+    networks:
+      - default-network
+      
+volumes:
+  primary-conf:
+  primary-data:
+  primary-logs:
+  replica-01-data:
+  replica-01-conf:
+  replica-01-logs:
+  replica-02-data:
+  replica-02-conf:
+  replica-02-logs:
+  setup-data:
+
+networks:
+  default-network:

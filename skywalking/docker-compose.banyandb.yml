@@ -1,0 +1,60 @@
+services:
+  skywalking-banyandb:
+    image: apache/skywalking-banyandb:0.9.0
+    container_name: skywalking-banyandb
+    command: standalone --stream-root-path /tmp/stream-data --measure-root-path /tmp/measure-data --observability-modes native
+    restart: unless-stopped
+    ports:
+      - 17912:17912
+      - 17913:17913
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "sh", "-c", "nc -vz localhost 17912"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  skywalking-banyandb-oap:
+    image: apache/skywalking-oap-server:10.3.0
+    container_name: skywalking-banyandb-oap
+    restart: unless-stopped
+    depends_on:
+      skywalking-banyandb:
+        condition: service_healthy
+    environment:
+      SW_CLUSTER: standalone
+      SW_STORAGE: banyandb
+      SW_STORAGE_BANYANDB_TARGETS: skywalking-banyandb:17912
+      SW_HEALTH_CHECKER: default
+      SW_TELEMETRY: prometheus
+    ports:
+      - 11800:11800
+      - 12800:12800
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://localhost:12800/healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+  skywalking-banyandb-ui:
+    image: apache/skywalking-ui:10.3.0
+    container_name: skywalking-banyandb-ui
+    restart: unless-stopped
+    depends_on:
+      skywalking-banyandb-oap:
+        condition: service_healthy
+    environment:
+      SW_OAP_ADDRESS: http://skywalking-banyandb-oap:12800
+      SW_ZIPKIN_ADDRESS: http://skywalking-banyandb-oap:9412
+    ports:
+      - 8080:8080
+    networks:
+      - default-network
+
+networks:
+  default-network:

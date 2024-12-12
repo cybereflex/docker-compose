@@ -1,0 +1,81 @@
+services:
+  postgresql:
+    image: postgres:13.18
+    container_name: postgresql
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+      POSTGRES_DB: metastore
+    volumes:
+      - data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "hive", "-d", "metastore"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  metastore:
+    build:
+      context: ./metastore
+      dockerfile: Dockerfile
+    image: hive-metastore:4.2.0
+    container_name: metastore
+    restart: unless-stopped
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    ports:
+      - 9083:9083
+    networks:
+      - default-network
+    environment:
+      DB_DRIVER: postgres
+      SERVICE_NAME: metastore
+      SERVICE_OPTS: "-Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgresql:5432/metastore -Djavax.jdo.option.ConnectionUserName=hive -Djavax.jdo.option.ConnectionPassword=hive"
+    volumes:
+      - warehouse:/opt/hive/data/warehouse
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/9083'",
+        ]
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  hiveserver2:
+    image: apache/hive:4.2.0
+    container_name: hiveserver2
+    restart: unless-stopped
+    depends_on:
+      metastore:
+        condition: service_healthy
+    environment:
+      IS_RESUME: true
+      SERVICE_NAME: hiveserver2
+      HIVE_SERVER2_THRIFT_PORT: 10000
+      SERVICE_OPTS: -Dhive.metastore.uris=thrift://metastore:9083
+    volumes:
+      - warehouse:/opt/hive/data/warehouse
+    ports:
+      - 10000:10000
+      - 10002:10002
+    networks:
+      - default-network
+
+volumes:
+  data:
+  warehouse:
+
+networks:
+  default-network:

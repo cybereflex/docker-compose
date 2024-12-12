@@ -1,0 +1,5 @@
+FROM apache/seata-server:2.2.0
+
+RUN mkdir /seata
+
+COPY ./conf /seata/

@@ -1,0 +1,17 @@
+services:
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:latest
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    volumes:
+      - home:/var/jenkins_home
+    networks:
+      - default-network
+
+volumes:
+  home:
+
+networks:
+  default-network:

@@ -1,0 +1,50 @@
+services:
+  opensearch-standalone:
+    container_name: opensearch-standalone
+    image: opensearchproject/opensearch:3.4.0
+    environment:
+      discovery.type: single-node
+      bootstrap.memory_lock: true
+      DISABLE_SECURITY_PLUGIN: true
+      DISABLE_INSTALL_DEMO_CONFIG: true
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - data:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "localhost:9200"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
+      start_period: 1m
+
+  opensearch-cluster-dashboard:
+    image: opensearchproject/opensearch-dashboards:3.4.0
+    container_name: opensearch-standalone-dashboard
+    depends_on:
+      opensearch-standalone:
+        condition: service_healthy
+    ports:
+      - 5601:5601
+    environment:
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+      OPENSEARCH_HOSTS: ["http://opensearch-standalone:9200"]
+    networks:
+      - default-network
+
+networks:
+  default-network:
+
+volumes:
+  data:

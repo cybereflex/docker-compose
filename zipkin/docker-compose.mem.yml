@@ -1,0 +1,15 @@
+services:
+  zipkin-mem:
+    image: openzipkin/zipkin-slim:3.5
+    container_name: zipkin-mem
+    restart: unless-stopped
+    environment:
+      STORAGE_TYPE: mem
+      JAVA_OPTS: "-Xms128m -Xmx128m -XX:+ExitOnOutOfMemoryError"
+    ports:
+      - 9411:9411
+    networks:
+      - default-network
+
+networks:
+  default-network:

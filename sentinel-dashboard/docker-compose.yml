@@ -1,0 +1,15 @@
+services:
+  sentinel-dashboard:
+    build: 
+      context: ./dashboard
+      dockerfile: Dockerfile
+    image: sentinel-dashboard:1.8.9
+    container_name: sentinel-dashboard
+    restart: unless-stopped
+    ports:
+      - 15566:15566
+    networks:
+      - default-network
+
+networks:
+  default-network:

@@ -1,0 +1,43 @@
+serverAddr = "10.100.133.11"
+serverPort = 7000
+
+log.to = "console"
+log.level = "info"
+log.maxDays = 3
+log.disablePrintColor = true
+
+auth.method = "token"
+auth.token = "12345678"
+
+webServer.addr = "127.0.0.1"
+webServer.port = 7500
+webServer.user = "admin"
+webServer.password = "admin"
+
+[[proxies]]
+name = "qbittorrent-stcp"
+type = "stcp"
+secretKey = "abcdefg"
+localIP = "127.0.0.1"
+localPort = 8080
+
+[[proxies]]
+name = "music-tag-stcp"
+type = "stcp"
+secretKey = "abcdefg"
+localIP = "127.0.0.1"
+localPort = 8001
+
+[[proxies]]
+name = "navidrom-stcp"
+type = "stcp"
+secretKey = "abcdefg"
+localIP = "127.0.0.1"
+localPort = 4533
+
+[[proxies]]
+name = "jellyfin-stcp"
+type = "stcp"
+secretKey = "abcdefg"
+localIP = "127.0.0.1"
+localPort = 8096

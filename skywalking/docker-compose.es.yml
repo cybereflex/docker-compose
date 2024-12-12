@@ -1,0 +1,72 @@
+services:
+  skywalking-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.1
+    container_name: skywalking-es
+    restart: unless-stopped
+    ports:
+      - 9200:9200
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      node.name: skywalking-es
+      cluster.name: skywalking-es-cluster
+      bootstrap.memory_lock: true
+      xpack.security.enabled: false
+      xpack.license.self_generated.type: basic
+      xpack.ml.use_auto_machine_memory_percent: true
+      ELASTIC_PASSWORD: skywalking
+    networks:
+      - default-network
+    volumes:
+      - data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "9200"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+
+  skywalking-es-oap:
+    image: apache/skywalking-oap-server:10.3.0
+    container_name: skywalking-es-oap
+    depends_on:
+      skywalking-es:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      SW_STORAGE: elasticsearch
+      SW_STORAGE_ES_CLUSTER_NODES: skywalking-es:9200
+      SW_STORAGE_ES_HTTP_PROTOCOL: http
+      SW_ES_PASSWORD: skywalking
+    ports:
+      - 11800:11800
+      - 12800:12800
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://localhost:12800/healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+  skywalking-es-ui:
+    image: apache/skywalking-ui:10.3.0
+    container_name: skywalking-es-ui
+    depends_on:
+      skywalking-es-oap:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      SW_OAP_ADDRESS: http://skywalking-es-oap:12800
+      SW_ZIPKIN_ADDRESS: http://skywalking-es-oap:9412
+    ports:
+      - 8080:8080
+    networks:
+      - default-network
+
+volumes:
+  data:
+
+networks:
+  default-network:

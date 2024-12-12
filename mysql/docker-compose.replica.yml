@@ -1,0 +1,86 @@
+services:
+  mysql-replica-master:
+    image: mysql:lts
+    container_name: mysql-replica-master
+    restart: unless-stopped
+    command: 
+      - mysqld
+      - --server-id=1
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
+      - --binlog-row-image=FULL
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: example
+      MYSQL_USER: example
+      MYSQL_PASSWORD: example
+      TZ: Asia/Shanghai
+    ports:
+      - 13306:3306
+    volumes:
+      - master-data:/var/lib/mysql
+      - master-conf:/etc/mysql/conf.d
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+  mysql-replica-slave:
+    image: mysql:lts
+    container_name: mysql-replica-slave
+    restart: unless-stopped
+    command: 
+      - mysqld
+      - --server-id=2
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+      - --read-only=ON
+      - --relay-log=mysql-relay-bin
+      - --log-slave-updates=ON
+      - --skip-slave-start=ON
+      - --relay-log-purge=ON
+      - --relay-log-recovery=ON
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 23306:3306
+    volumes:
+      - slave-data:/var/lib/mysql
+      - slave-conf:/etc/mysql/conf.d
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+  mysql-replica-setup:
+    build: 
+      context: ./mysql-replica-setup
+      dockerfile: Dockerfile
+    image: mysql-replica-setup:lts
+    container_name: mysql-replica-setup
+    depends_on:
+      mysql-replica-master:
+        condition: service_healthy
+      mysql-replica-slave:
+        condition: service_healthy
+    networks:
+      - default-network
+
+networks:
+  default-network:
+
+volumes:
+  master-data:
+  master-conf:
+  slave-data:
+  slave-conf:

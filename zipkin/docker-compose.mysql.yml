@@ -1,0 +1,55 @@
+services:
+  zipkin-mysql-storage:
+    image: ghcr.io/openzipkin/zipkin-mysql:latest
+    container_name: zipkin-mysql-storage
+    restart: unless-stopped
+    networks:
+      - default-network
+    volumes:
+      - data:/var/lib/mysql
+      - conf:/etc/mysql/conf.d
+
+  zipkin-mysql-dependencies:
+    image: ghcr.io/openzipkin/zipkin-dependencies:latest
+    container_name: zipkin-mysql-dependencies
+    user: root
+    entrypoint: /usr/sbin/crond -f
+    depends_on:
+      zipkin-mysql-storage:
+        condition: service_healthy
+    networks:
+      - default-network
+    environment:
+      STORAGE_TYPE: mysql
+      MYSQL_DB: zipkin
+      MYSQL_USER: zipkin
+      MYSQL_PASS: zipkin
+      MYSQL_HOST: zipkin-mysql-storage
+      MYSQL_TCP_PORT: 3306
+
+  zipkin-mysql:
+    image: ghcr.io/openzipkin/zipkin:3.5
+    container_name: zipkin-mysql
+    restart: unless-stopped
+    depends_on:
+      zipkin-mysql-storage:
+        condition: service_healthy
+    networks:
+      - default-network
+    environment:
+      STORAGE_TYPE: mysql
+      MYSQL_DB: zipkin
+      MYSQL_USER: zipkin
+      MYSQL_PASS: zipkin
+      MYSQL_HOST: zipkin-mysql-storage
+      MYSQL_TCP_PORT: 3306
+      JAVA_OPTS: "-Xms128m -Xmx128m -XX:+ExitOnOutOfMemoryError"
+    ports:
+      - 29411:9411
+
+networks:
+  default-network:
+
+volumes:
+  data:
+  conf:

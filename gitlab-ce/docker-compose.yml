@@ -1,0 +1,26 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: unless-stopped
+    networks:
+      - default-network
+    environment:
+      GITLAB_OMNIBUS_CONFIG: "external_url 'http://0.0.0.0:30080'"
+    ports:
+      - 30080:30080
+      - 30443:30443
+      - 30022:30022
+    shm_size: 256m
+    volumes:
+      - data:/var/opt/gitlab
+      - conf:/etc/gitlab
+      - logs:/var/log/gitlab
+
+networks:
+  default-network:
+
+volumes:
+  data:
+  logs:
+  conf:

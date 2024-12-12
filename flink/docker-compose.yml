@@ -1,0 +1,41 @@
+services:
+  jobmanager:
+    build:
+      context: ./flink-connectors
+      dockerfile: Dockerfile
+    image: flink-connectors:2.0.0
+    container_name: jobmanager
+    restart: unless-stopped
+    user: flink:flink
+    ports:
+      - 8081:8081
+    environment:
+      FLINK_PROPERTIES: |-
+        rest.port: 8081
+        parallelism.default: 2
+        jobmanager.rpc.address: jobmanager
+    command: jobmanager
+    networks:
+      - default-network
+
+  taskmanager:
+    build:
+      context: ./flink-connectors
+      dockerfile: Dockerfile
+    image: flink-connectors:2.0.0
+    container_name: taskmanager
+    restart: unless-stopped
+    user: flink:flink
+    depends_on:
+      - jobmanager
+    environment:
+      FLINK_PROPERTIES: |-
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 4
+        parallelism.default: 2
+    command: taskmanager
+    networks:
+      - default-network
+
+networks:
+  default-network:
