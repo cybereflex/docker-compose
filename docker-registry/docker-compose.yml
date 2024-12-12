@@ -1,0 +1,17 @@
+services:
+  docker-registry:
+    image: registry:2
+    container_name: docker-registry
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    default-networks:
+      - default-network
+    volumes:
+      - data:/var/lib/registry
+
+volumes:
+  data:
+
+default-networks:
+  default-network:

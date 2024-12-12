@@ -1,0 +1,23 @@
+services:
+  zk-standalone:
+    container_name: zk-standalone
+    image: zookeeper:3.9.3
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 42181:2181
+    volumes:
+      - data:/data
+      - datalog:/datalog
+      - logs:/logs
+    environment:
+      ZOO_STANDALONE_ENABLED: true
+
+networks:
+  default-network:
+
+volumes:
+  data:
+  datalog:
+  logs:

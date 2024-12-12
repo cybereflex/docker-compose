@@ -1,0 +1,189 @@
+services:
+  env-mysql:
+    image: mysql:lts
+    container_name: env-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: example
+      MYSQL_USER: example
+      MYSQL_PASSWORD: example
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - mysql-conf:/etc/mysql/conf.d
+    networks:
+      - default-network
+
+  env-postgres:
+    image: postgres:18-alpine
+    container_name: env-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: example
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: example
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    ports:
+      - 5432:5432
+    networks:
+      - default-network
+
+  env-oracledb:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: env-oracledb
+    restart: unless-stopped
+    environment:
+      ORACLE_PWD: example
+    networks:
+      - default-network
+    ports:
+      - 1521:1521
+    volumes:
+      - oracledb-data:/opt/oracle/oradata
+
+  env-mongo:
+    image: mongo:8.0.3
+    container_name: env-mongo
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+      - mongo-conf:/data/configdb
+      - mongo-logs:/data/log
+    networks:
+      - default-network
+
+  env-rabbitmq:
+    image: rabbitmq:4.0.5-management
+    container_name: env-rabbitmq
+    restart: unless-stopped
+    ports:
+      - 15672:15672
+      - 5672:5672
+      - 1883:1883
+      - 5552:5552
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    command: >
+      bash -c "
+        rabbitmq-plugins enable rabbitmq_mqtt && 
+        rabbitmq-plugins enable rabbitmq_stream &&
+        rabbitmq-server
+      "
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - default-network
+  
+  env-kafka:
+    image: apache/kafka:4.1.1
+    container_name: env-kafka
+    restart: unless-stopped
+    ports:
+      - 9092:9092
+    networks:
+      - default-network
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - kafka-secrets:/etc/kafka/secrets
+      - kafka-conf:/mnt/shared/config
+    environment:
+      CLUSTER_ID: env-kafka
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: CONTROLLER://:29092,PLAINTEXT://:19092,PLAINTEXT_HOST://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://env-kafka:19092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:29092
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  env-redis:
+    image: redis:7.4.1
+    container_name: env-redis
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+    networks:
+      - default-network
+
+  env-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.1
+    container_name: env-es
+    restart: unless-stopped
+    ports:
+      - 9200:9200
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      node.name: env-es
+      cluster.name: env-es
+      bootstrap.memory_lock: true
+      xpack.security.enabled: false
+      xpack.license.self_generated.type: basic
+      xpack.ml.use_auto_machine_memory_percent: true
+      ELASTIC_PASSWORD: elastic
+    networks:
+      - default-network
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - es-data:/usr/share/elasticsearch/data
+
+  env-hive2:
+    image: apache/hive:4.2.0
+    container_name: env-hive2
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: hiveserver2
+    ports:
+      - 10000:10000
+      - 10002:10002
+    networks:
+      - default-network
+
+  env-nginx:
+    image: nginx:latest
+    container_name: env-nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - nginx-html:/usr/share/nginx/html
+      - nginx-conf:/etc/nginx/conf.d
+    networks:
+      - default-network
+
+networks:
+  default-network:
+
+volumes:
+  mysql-data:
+  mysql-conf:
+  postgres-data:
+  mongo-data:
+  mongo-conf:
+  mongo-logs:
+  rabbitmq-data:
+  kafka-data:
+  kafka-secrets:
+  kafka-conf:
+  oracledb-data:
+  redis-data:
+  es-data:
+  nginx-html:
+  nginx-conf:

@@ -1,0 +1,57 @@
+services:
+  hbbr:
+    image: rustdesk/rustdesk-server:latest
+    container_name: hbbr
+    restart: unless-stopped
+    command: hbbr
+    ports:
+      - 21117:21117
+      - 21119:21119
+    networks:
+      - default-network
+    volumes:
+      - rustdesk-data:/root
+  
+  hbbs:
+    image: rustdesk/rustdesk-server:latest
+    container_name: hbbs
+    restart: unless-stopped
+    depends_on:
+      - hbbr
+    command: ["hbbs", "-r", "10.100.133.11:21117"]
+    ports:
+      - 21115:21115
+      - 21116:21116
+      - 21116:21116/udp
+      - 21118:21118
+    networks:
+      - default-network
+    volumes:
+      - rustdesk-data:/root
+
+  frps:
+    image: fatedier/frps:v0.65.0
+    container_name: frps
+    restart: unless-stopped
+    command: ["-c", "/opt/frp/config/frps.toml"]
+    ports:
+      - 7000:7000
+    networks:
+      - default-network
+    volumes:
+      - frp-conf:/opt/frp/config
+
+networks:
+  default-network:
+
+volumes:
+  frp-conf:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/frp/config
+  rustdesk-data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/rustdesk/data

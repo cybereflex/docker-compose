@@ -1,0 +1,21 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - html:/usr/share/nginx/html
+      - conf:/etc/nginx/conf.d
+    networks:
+      - default-network
+
+volumes:
+  html:
+  conf:
+
+networks:
+  default-network:
+    

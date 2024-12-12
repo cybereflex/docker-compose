@@ -1,0 +1,57 @@
+services:
+  grafana-kafka:
+    image: apache/kafka:4.1.1
+    container_name: grafana-kafka
+    restart: unless-stopped
+    ports:
+      - 9092:9092
+    networks:
+      - default-network
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - kafka-secrets:/etc/kafka/secrets
+      - kafka-conf:/mnt/shared/config
+    environment:
+      CLUSTER_ID: grafana-kafka
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: CONTROLLER://:19092,PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://grafana-kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@grafana-kafka:19092
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "9092"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  grafana-kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.9.0
+    container_name: grafana-kafka-exporter
+    restart: unless-stopped
+    depends_on:
+      grafana-kafka:
+        condition: service_healthy
+    command: |
+      --kafka.server=grafana-kafka:9092
+    networks:
+      - default-network
+    ports:
+      - 9308:9308
+
+networks:
+  default-network:
+
+volumes:
+  kafka-data:
+  kafka-secrets:
+  kafka-conf:

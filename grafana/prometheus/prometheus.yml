@@ -1,0 +1,63 @@
+global:
+  scrape_interval: 15s
+
+rule_files:
+  - rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - grafana-alertmanager:9093
+
+scrape_configs:
+  # Spring Boot Micrometer
+  # - job_name: grafana-spring-boot-application
+  #   static_configs:
+  #    - targets:
+  #        - grafana-spring-boot-application:8888
+
+  - job_name: grafana-prometheus
+    static_configs:
+      - targets:
+          - grafana-prometheus:9090
+
+  - job_name: grafana-rabbitmq
+    static_configs:
+      - targets:
+          - grafana-rabbitmq:15692
+
+  - job_name: grafana-node-exporter
+    static_configs:
+      - targets:
+          - grafana-node-exporter:9100
+
+  - job_name: grafana-mysql-exporter
+    static_configs:
+      - targets:
+          - grafana-mysql-exporter:9104
+
+  - job_name: grafana-postgres-exporter
+    static_configs:
+      - targets:
+          - grafana-postgres-exporter:9187
+
+  - job_name: grafana-elasticsearch-exporter
+    static_configs:
+      - targets:
+          - grafana-elasticsearch-exporter:9114
+
+  - job_name: grafana-kafka-exporter
+    static_configs:
+      - targets:
+          - grafana-kafka-exporter:9308
+
+  - job_name: grafana-redis-exporter
+    static_configs:
+      - targets:
+          - grafana-redis-exporter:9121
+  
+  - job_name: grafana-mongo-exporter
+    static_configs:
+      - targets:
+          - grafana-mongo-exporter:9216

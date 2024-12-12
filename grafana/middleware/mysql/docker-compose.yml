@@ -1,0 +1,46 @@
+services:
+  grafana-mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: grafana-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: example
+      MYSQL_USER: example
+      MYSQL_PASSWORD: example
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - mysql-conf:/etc/mysql/conf.d
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  grafana-mysql-exporter:
+    build:
+      context: ./mysql-exporter
+      dockerfile: Dockerfile
+    image: mysqld-exporter:v0.16.0
+    container_name: grafana-mysql-exporter
+    restart: unless-stopped
+    depends_on:
+      grafana-mysql:
+        condition: service_healthy
+    networks:
+      - default-network
+    ports:
+      - 9104:9104
+
+networks:
+  default-network:
+
+volumes:
+  mysql-data:
+  mysql-conf:

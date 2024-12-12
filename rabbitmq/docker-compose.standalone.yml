@@ -1,0 +1,29 @@
+services:
+  rabbitmq-standalone:
+    image: rabbitmq:4.0.5-management
+    container_name: rabbitmq-standalone
+    restart: unless-stopped
+    ports:
+      - 15672:15672
+      - 5672:5672
+      - 1883:1883
+      - 5552:5552
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    command: >
+      bash -c "
+        rabbitmq-plugins enable rabbitmq_mqtt && 
+        rabbitmq-plugins enable rabbitmq_stream &&
+        rabbitmq-server
+      "
+    volumes:
+      - data:/var/lib/rabbitmq
+    networks:
+      - default-network
+
+volumes:
+  data:
+
+networks:
+  default-network:

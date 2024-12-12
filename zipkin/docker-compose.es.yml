@@ -1,0 +1,45 @@
+services:
+  zipkin-es-storage:
+    container_name: zipkin-es-storage
+    image: ghcr.io/openzipkin/zipkin-elasticsearch8:latest
+    restart: unless-stopped
+    networks:
+      - default-network
+    volumes:
+      - data:/usr/share/elasticsearch/data
+
+  zipkin-es-dependencies:
+    image: ghcr.io/openzipkin/zipkin-dependencies:latest
+    container_name: zipkin-es-dependencies
+    user: root
+    entrypoint: /usr/sbin/crond -f
+    depends_on:
+      zipkin-es-storage:
+        condition: service_healthy
+    networks:
+      - default-network
+    environment:
+      STORAGE_TYPE: elasticsearch
+      ES_HOSTS: zipkin-es-storage:9200
+
+  zipkin-es:
+    image: ghcr.io/openzipkin/zipkin:3.5
+    container_name: zipkin-es
+    restart: unless-stopped
+    depends_on:
+      zipkin-es-storage:
+        condition: service_healthy
+    networks:
+      - default-network
+    environment:
+      STORAGE_TYPE: elasticsearch
+      ES_HOSTS: zipkin-es-storage:9200
+      JAVA_OPTS: "-Xms128m -Xmx128m -XX:+ExitOnOutOfMemoryError"
+    ports:
+      - 19411:9411
+
+networks:
+  default-network:
+
+volumes:
+  data: 

@@ -1,0 +1,17 @@
+{
+  "name": "oracle-connector",
+  "config": {
+    "tasks.max" : "1", 
+    "connector.class": "io.debezium.connector.oracle.OracleConnector",
+    "database.hostname": "debezium-oracle",
+    "database.port": "1521",
+    "database.user": "c##replica",
+    "database.password": "replica",
+    "database.dbname": "FREE",
+    "database.pdb.name": "FREEPDB1",
+    "table.include.list": "DEBEZIUM.*",
+    "topic.prefix" : "debezium-oracle",
+    "schema.history.internal.kafka.bootstrap.servers": "debezium-kafka:9092",
+    "schema.history.internal.kafka.topic": "debezium-oracle-schema-changes.debezium"
+  }
+}

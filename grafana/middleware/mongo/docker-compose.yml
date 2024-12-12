@@ -1,0 +1,32 @@
+services:
+  grafana-mongo:
+    image: mongo:8.0.3
+    container_name: grafana-mongo
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+      - mongo-conf:/data/configdb
+      - mongo-logs:/data/log
+    networks:
+      - default-network
+
+  grafana-mongo-exporter:
+    image: percona/mongodb_exporter:0.39
+    container_name: grafana-mongo-exporter
+    restart: unless-stopped
+    command: |
+      --mongodb.uri=mongodb://grafana-mongo:27017
+    ports:
+      - 9216:9216
+    networks:
+      - default-network
+
+volumes:
+  mongo-conf:
+  mongo-data:
+  mongo-logs:
+
+networks:
+  default-network:

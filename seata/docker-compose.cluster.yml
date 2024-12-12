@@ -1,0 +1,57 @@
+services:
+  seata-server-01:
+    build: 
+      context: ./seata-server-cluster
+      dockerfile: Dockerfile.cluster
+    container_name: seata-server-01
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 8091:8091
+      - 7091:7091
+    environment:
+      SEATA_IP: seata-server-01
+      SEATA_PORT: 8091
+      STORE_MODE: file
+      SERVER_NODE: 1
+      SEATA_CONFIG_NAME: file:/seata/conf/registry-cluster
+
+  seata-server-02:
+    build: 
+      context: ./seata-server-cluster
+      dockerfile: Dockerfile.cluster
+    container_name: seata-server-02
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 8092:8092
+      - 7092:7092
+    environment:
+      SEATA_IP: seata-server-02
+      SEATA_PORT: 8092
+      STORE_MODE: file
+      SERVER_NODE: 2
+      SEATA_CONFIG_NAME: file:/seata/conf/registry-cluster
+
+  seata-server-03:
+    build: 
+      context: ./seata-server-cluster
+      dockerfile: Dockerfile.cluster
+    container_name: seata-server-03
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 8093:8093
+      - 7093:7093
+    environment:
+      SEATA_IP: seata-server-03
+      SEATA_PORT: 8093
+      STORE_MODE: file
+      SERVER_NODE: 3
+      SEATA_CONFIG_NAME: file:/seata/conf/registry-cluster
+
+networks:
+  default-network:

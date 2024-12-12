@@ -1,0 +1,24 @@
+services:
+  mysql:
+    image: mysql:lts
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: example
+      MYSQL_USER: example
+      MYSQL_PASSWORD: example
+    ports:
+      - 3306:3306
+    volumes:
+      - data:/var/lib/mysql
+      - conf:/etc/mysql/conf.d
+    networks:
+      - default-network
+
+networks:
+  default-network:
+
+volumes:
+  data:
+  conf:

@@ -1,0 +1,14 @@
+{
+  "name": "postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "database.hostname": "debezium-postgres",
+    "database.port": "5432",
+    "database.user": "debezium",
+    "database.password": "debezium",
+    "database.dbname": "example",
+    "topic.prefix": "debezium-postgres",
+    "schema.include.list": "example"
+  }
+}

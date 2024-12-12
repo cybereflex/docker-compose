@@ -1,0 +1,102 @@
+services:
+  rocketmq-nameserver:
+    image: apache/rocketmq:5.3.1
+    container_name: rocketmq-nameserver
+    command: sh mqnamesrv
+    restart: unless-stopped
+    environment:
+      JAVA_OPT: "-Xms128m -Xmx128m -Xmn64m"
+      NAMESRV_ADDR: rocketmq-nameserver:9876
+    ports:
+      - 9876:9876
+    networks:
+      - default-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/9876'",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.1
+    container_name: rocketmq-broker
+    command: sh mqbroker
+    restart: unless-stopped
+    depends_on:
+      rocketmq-nameserver:
+        condition: service_healthy
+    environment:
+      JAVA_OPT: "-Xms512m -Xmx512m -Xmn256m"
+      NAMESRV_ADDR: rocketmq-nameserver:9876
+      BROKER_ID: 0
+      BROKER_HOME: /opt/rocketmq
+    ports:
+      - 10909:10909
+      - 10911:10911
+      - 10912:10912
+    networks:
+      - default-network
+    volumes:
+      - broker-data:/opt/rocketmq/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/10911'",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  rocketmq-proxy:
+    image: apache/rocketmq:5.3.1
+    container_name: rocketmq-proxy
+    command: sh mqproxy
+    restart: unless-stopped
+    networks:
+      - default-network
+    depends_on:
+      rocketmq-broker:
+        condition: service_healthy
+      rocketmq-nameserver:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+      - 8081:8081
+    environment:
+      NAMESRV_ADDR: rocketmq-nameserver:9876
+
+  rocketmq-dashboard:
+    image: apacherocketmq/rocketmq-dashboard:2.1.0
+    container_name: rocketmq-dashboard
+    restart: unless-stopped
+    networks:
+      - default-network
+    depends_on:
+      rocketmq-broker:
+        condition: service_healthy
+      rocketmq-nameserver:
+        condition: service_healthy
+    ports:
+      - 8082:8082
+    environment:
+      JAVA_OPTS: -Drocketmq.namesrv.addr=rocketmq-nameserver:9876
+    volumes:
+      - dashboard-tmp:/tmp
+      
+networks:
+  default-network:
+
+volumes:
+  broker-data:
+  dashboard-tmp:

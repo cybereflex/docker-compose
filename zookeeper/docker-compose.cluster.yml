@@ -1,0 +1,62 @@
+services:
+  zk-cluster-01:
+    container_name: zk-cluster-01
+    image: zookeeper:3.9.3
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 12181:2181
+    volumes:
+      - data-01:/data
+      - datalog-01:/datalog
+      - logs-01:/logs
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zk-cluster-01:2888:3888;2181 server.2=zk-cluster-02:2888:3888;2181 server.3=zk-cluster-03:2888:3888;2181
+
+  zk-cluster-02:
+    container_name: zk-cluster-02
+    image: zookeeper:3.9.3
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 22181:2181
+    volumes:
+      - data-02:/data
+      - datalog-02:/datalog
+      - logs-02:/logs
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zk-cluster-01:2888:3888;2181 server.2=zk-cluster-02:2888:3888;2181 server.3=zk-cluster-03:2888:3888;2181
+
+  zk-cluster-03:
+    container_name: zk-cluster-03
+    image: zookeeper:3.9.3
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 32181:2181
+    volumes:
+      - data-03:/data
+      - datalog-03:/datalog
+      - logs-03:/logs
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zk-cluster-01:2888:3888;2181 server.2=zk-cluster-02:2888:3888;2181 server.3=zk-cluster-03:2888:3888;2181
+
+networks:
+  default-network:
+
+volumes:
+  data-01:
+  datalog-01:
+  logs-01:
+  data-02:
+  datalog-02:
+  logs-02:
+  data-03:
+  datalog-03:
+  logs-03:

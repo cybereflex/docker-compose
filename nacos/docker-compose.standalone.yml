@@ -1,0 +1,55 @@
+services:
+  nacos-standalone-mysql:
+    container_name: nacos-standalone-mysql
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    image: nacos-mysql/mysql:5.7.44
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nacos
+      MYSQL_USER: nacos
+      MYSQL_PASSWORD: nacos
+    volumes:
+      - data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - default-network
+
+  nacos-standalone:
+    image: nacos/nacos-server:v2.4.3
+    container_name: nacos-standalone
+    depends_on:
+      nacos-standalone-mysql:
+        condition: service_healthy
+    environment:
+      PREFER_HOST_MODE: hostname
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: nacos-standalone-mysql
+      MYSQL_SERVICE_DB_NAME: nacos
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_USER: nacos
+      MYSQL_SERVICE_PASSWORD: nacos
+      NACOS_AUTH_IDENTITY_KEY: indentity_key
+      NACOS_AUTH_IDENTITY_VALUE: indentity_value
+      NACOS_AUTH_TOKEN: SecretKey012345678901234567890123456789012345678901234567890123456789
+      NACOS_AUTH_ENABLE: true
+    volumes:
+      - logs:/home/nacos/logs
+    ports:
+      - 8848:8848
+      - 9848:9848
+    networks:
+      - default-network
+
+volumes:
+  logs:
+  data:
+
+networks:
+  default-network:

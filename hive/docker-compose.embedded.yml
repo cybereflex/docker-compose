@@ -1,0 +1,15 @@
+services:
+  hiveserver2:
+    image: apache/hive:4.2.0
+    container_name: hiveserver2
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: hiveserver2
+    ports:
+      - 10000:10000
+      - 10002:10002
+    networks:
+      - default-network
+
+networks:
+  default-network:

@@ -1,0 +1,60 @@
+metricbeat.config.modules:
+  path: /usr/share/metricbeat/data/modules.d/*.yml
+  reload.enabled: false
+
+metricbeat.modules:
+  - module: elasticsearch
+    xpack.enabled: true
+    period: 10s
+    hosts: ["http://es-cluster-01:9200"]
+    username: elastic
+    password: elastic
+    ssl.enabled: false
+
+  - module: elasticsearch
+    xpack.enabled: true
+    period: 10s
+    hosts: ["http://es-cluster-02:9200"]
+    username: elastic
+    password: elastic
+    ssl.enabled: false
+    
+  - module: elasticsearch
+    xpack.enabled: true
+    period: 10s
+    hosts: ["http://es-cluster-03:9200"]
+    username: elastic
+    password: elastic
+    ssl.enabled: false
+
+  - module: kibana
+    metricsets:
+      - stats
+    period: 10s
+    hosts: es-cluster-kibana
+    username: elastic
+    password: elastic
+    xpack.enabled: true
+
+  - module: docker
+    metricsets:
+      - "container"
+      - "cpu"
+      - "diskio"
+      - "healthcheck"
+      - "info"
+      - "image"
+      - "memory"
+      - "network"
+    hosts: ["unix:///var/run/docker.sock"]
+    period: 10s
+    enabled: true
+
+processors:
+  - add_host_metadata: ~
+  - add_docker_metadata: ~
+
+output.elasticsearch:
+  hosts: ["http://es-cluster-01:9200"]
+  username: elastic
+  password: elastic

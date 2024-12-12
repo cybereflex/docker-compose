@@ -1,0 +1,90 @@
+services:
+  postgres-primary:
+    image: postgres:17-alpine
+    container_name: postgres-primary
+    user: postgres
+    restart: unless-stopped
+    command: |
+      postgres
+      -c wal_level=logical
+      -c hot_standby=on
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby_feedback=on
+    environment:
+      POSTGRES_USER: example
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: example
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication all 0.0.0.0/0 md5"
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - ./replica/init-replica-primary.sql:/docker-entrypoint-initdb.d/init-replica-primary.sql
+      - primary-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "example", "-d", "example"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
+
+  postgres-replica:
+    image: postgres:17-alpine
+    container_name: postgres-replica
+    user: postgres
+    restart: unless-stopped
+    command: |
+      bash -c '
+        pg_basebackup --pgdata=/var/lib/postgresql/data -R --wal-method=stream --slot=replication_slot --host=postgres-primary --port=5432
+        chmod 0700 /var/lib/postgresql/data
+        postgres -c wal_level=logical -c hot_standby=on -c hot_standby_feedback=on
+      '
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    environment:
+      PGUSER: replica
+      PGPASSWORD: replica
+    ports:
+      - 15432:5432
+    networks:
+      - default-network
+    volumes:
+      - replica-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "example", "-d", "example"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: pgbouncer
+    restart: unless-stopped
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+      postgres-replica:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres-primary
+      DB_PORT: 5432
+      DB_USER: example
+      DB_PASSWORD: example
+      AUTH_TYPE: scram-sha-256
+      ADMIN_USERS: postgres,admin
+    ports:
+      - 25432:5432
+    networks:
+      - default-network
+
+volumes:
+  primary-data:
+  replica-data:
+
+networks:
+  default-network:

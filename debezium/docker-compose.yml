@@ -1,0 +1,177 @@
+services:
+  debezium-mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    image: debezium-mysql:lts
+    container_name: debezium-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: example
+      MYSQL_USER: example
+      MYSQL_PASSWORD: example
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - mysql-conf:/etc/mysql/mysql-conf.d
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 15s
+
+  debezium-oracle:
+    build:
+      context: ./oracle
+      dockerfile: Dockerfile
+    image: debezium-oracle:free
+    container_name: debezium-oracle
+    restart: unless-stopped
+    environment:
+      ORACLE_PDB: FREEPDB1
+      ORACLE_PWD: SYS
+    networks:
+      - default-network
+    ports:
+      - 1521:1521
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "echo 'SELECT 1 FROM DUAL;' | sqlplus SYS/SYS@localhost:1521/FREEPDB1 as sysdba | grep -q '1'",
+        ]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 15s
+
+  debezium-postgres:
+    build:
+      context: ./postgresql
+      dockerfile: Dockerfile
+    image: debezium-postgres:18-alpine
+    container_name: debezium-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: example
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: example
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication debezium 0.0.0.0/0 md5"
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    ports:
+      - 5432:5432
+    networks:
+      - default-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "example", "-d", "example"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 15s
+
+  debezium-zookeeper:
+    image: confluentinc/cp-zookeeper:7.8.0
+    hostname: debezium-zookeeper
+    container_name: debezium-zookeeper
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVERS: debezium-zookeeper:2888:3888
+
+  debezium-kafka:
+    image: confluentinc/cp-kafka:7.8.0
+    hostname: debezium-kafka
+    container_name: debezium-kafka
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://debezium-kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ZOOKEEPER_CONNECT: debezium-zookeeper:2181
+      KAFKA_LOG4J_LOGGERS: kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
+    depends_on:
+      - debezium-zookeeper
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "9092"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
+
+  debezium-kafbat-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    restart: unless-stopped
+    container_name: debezium-kafbat-ui
+    depends_on:
+      debezium-kafka:
+        condition: service_healthy
+    networks:
+      - default-network
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: true
+      KAFKA_CLUSTERS_0_NAME: debezium-kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: debezium-kafka:9092
+
+  debezium-connect:
+    image: quay.io/debezium/connect:3.4
+    container_name: debezium-connect
+    restart: unless-stopped
+    depends_on:
+      debezium-kafka:
+        condition: service_healthy
+      debezium-mysql:
+        condition: service_healthy
+      debezium-postgres:
+        condition: service_healthy
+      debezium-oracle:
+        condition: service_healthy
+    networks:
+      - default-network
+    environment:
+      GROUP_ID: 1
+      BOOTSTRAP_SERVERS: debezium-kafka:9092
+      CONFIG_STORAGE_TOPIC: debezium-connect-configs
+      OFFSET_STORAGE_TOPIC: debezium-connect-offsets
+      STATUS_STORAGE_TOPIC: debezium-connect-statuses
+    ports:
+      - 8083:8083
+
+networks:
+  default-network:
+
+volumes:
+  mysql-data:
+  mysql-conf:
+  oracle-data:
+  postgres-data:
+  kafka-data:
+  kafka-secrets:
+  kafka-conf:
