@@ -1,0 +1,22 @@
+services:
+  mongo:
+    image: mongo:8.0.3
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - mongo_conf:/data/configdb
+      - mongo_logs:/data/log
+    networks:
+      - mongo_network
+    
+volumes:
+  mongo_conf:
+  mongo_data:
+  mongo_logs:
+
+networks:
+  mongo_network:
+    driver: bridge

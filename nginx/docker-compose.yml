@@ -1,0 +1,22 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - nginx_html:/usr/share/nginx/html
+      - nginx_conf.d:/etc/nginx/conf.d
+    networks:
+      - nginx_network
+
+volumes:
+  nginx_html:
+  nginx_conf.d:
+
+networks:
+  nginx_network:
+    driver: bridge
+    

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:13.18
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: 'example'
+      POSTGRES_PASSWORD: 'example' 
+      POSTGRES_DB: 'example'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - postgres_network
+volumes:
+  postgres_data:
+  
+networks:
+  postgres_network: 
+    driver: bridge

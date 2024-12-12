@@ -1,0 +1,70 @@
+services:
+  opensearch-01:
+    container_name: opensearch-01
+    image: opensearchproject/opensearch:2.18.0
+    environment:
+      - node.name=opensearch-01
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=opensearch-01,opensearch-02
+      - cluster.initial_cluster_manager_nodes=opensearch-01,opensearch-02
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch_data_01:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600
+    networks:
+      - opensearch_network
+
+  opensearch-02:
+    container_name: opensearch-02
+    image: opensearchproject/opensearch:2.18.0
+    environment:
+      - node.name=opensearch-02
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=opensearch-01,opensearch-02
+      - cluster.initial_cluster_manager_nodes=opensearch-01,opensearch-02
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch_data_02:/usr/share/opensearch/data
+    networks:
+      - opensearch_network
+
+  opensearch-dashboard:
+    image: opensearchproject/opensearch-dashboards:2.18.0
+    container_name: opensearch-dashboard
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-01:9200","https://opensearch-02:9200"]'
+    networks:
+      - opensearch_network
+
+networks:
+  opensearch_network:
+    driver: bridge
+
+volumes:
+  opensearch_data_01:
+  opensearch_data_02:
+  

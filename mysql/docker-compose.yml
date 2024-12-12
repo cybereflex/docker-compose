@@ -1,0 +1,23 @@
+services:
+  mysql:
+    image: mysql:9.1.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "example"
+      MYSQL_USER: "example"
+      MYSQL_PASSWORD: "example"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "mysql_data:/var/lib/mysql"
+      - "mysql_conf.d:/etc/mysql/conf.d"
+    networks:
+      - "mysql_network"
+networks:
+  mysql_network:
+    driver: bridge
+volumes:
+  mysql_data:
+  mysql_conf.d:

@@ -1,0 +1,87 @@
+services:
+  nacos-cluster-1:
+    hostname: nacos-cluster-1
+    container_name: nacos-cluster-1
+    image: nacos/nacos-server:v2.4.3
+    volumes:
+      - nacos_cluster_1_logs:/home/nacos/logs
+    ports:
+      - "7848:7848"
+      - "8848:8848"
+      - "9868:9848"
+      - "9850:9849"
+    env_file:
+      - ./env/nacos-cluster-hostname.env
+    depends_on:
+      nacos-mysql-cluster:
+        condition: service_healthy
+    networks:
+      - nacos_cluster_network
+
+  nacos-cluster-2:
+    hostname: nacos-cluster-2
+    image: nacos/nacos-server:v2.4.3
+    container_name: nacos-cluster-2
+    volumes:
+      - nacos_cluster_2_logs:/home/nacos/logs
+    ports:
+      - "7849:7848"
+      - "8849:8848"
+      - "9869:9848"
+      - "9851:9849"
+    env_file:
+      - ./env/nacos-cluster-hostname.env
+    depends_on:
+      nacos-mysql-cluster:
+        condition: service_healthy
+    networks:
+      - nacos_cluster_network
+
+  nacos-cluster-3:
+    hostname: nacos-cluster-3
+    image: nacos/nacos-server:v2.4.3
+    container_name: nacos-cluster-3
+    volumes:
+      - nacos_cluster_3_logs:/home/nacos/logs
+    ports:
+      - "7850:7848"
+      - "8850:8848"
+      - "9870:9848"
+      - "9852:9849"
+    env_file:
+      - ./env/nacos-cluster-hostname.env
+    depends_on:
+      nacos-mysql-cluster:
+        condition: service_healthy
+    networks:
+      - nacos_cluster_network
+
+  nacos-mysql-cluster:
+    container_name: nacos-mysql-cluster
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: nacos-mysql/mysql:5.7.44
+    env_file:
+      - ./env/mysql.env
+    volumes:
+      - nacos_mysql_cluster_data:/var/lib/mysql
+    ports:
+      - "5506:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - nacos_cluster_network
+
+volumes:
+  nacos_mysql_cluster_data:
+  nacos_cluster_1_logs:
+  nacos_cluster_2_logs:
+  nacos_cluster_3_logs:
+
+networks:
+  nacos_cluster_network:
+    driver: bridge

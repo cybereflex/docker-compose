@@ -1,0 +1,17 @@
+services:
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:latest
+    ports:
+      - 8888:8080
+    volumes:
+      - jenkins_config:/var/jenkins_home
+    networks:
+      - jenkins_network
+
+volumes:
+  jenkins_config:
+
+networks:
+  jenkins_network:
+    driver: bridge
