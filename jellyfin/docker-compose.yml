@@ -1,0 +1,37 @@
+services:
+  jellyfin:
+    container_name: jellyfin
+    image: linuxserver/jellyfin:latest
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    ports:
+      - 8096:8096
+    networks:
+      - jellyfin_network
+    volumes:
+      - jellyfin_config:/config
+      - jellyfin_movies:/data/movies
+      - jellyfin_tv:/data/tv
+      - jellyfin_animes:/data/animes
+      - jellyfin_music:/data/music
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/vcsm:/dev/vcsm
+      - /dev/vchiq:/dev/vchiq
+      - /dev/video10:/dev/video10
+      - /dev/video11:/dev/video11
+      - /dev/video12:/dev/video12
+
+networks:
+  jellyfin_network:
+    driver: bridge
+
+volumes:
+  jellyfin_config:
+  jellyfin_movies:
+  jellyfin_tv:
+  jellyfin_animes:
+  jellyfin_music:
