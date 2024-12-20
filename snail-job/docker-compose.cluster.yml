@@ -1,0 +1,87 @@
+services:
+  snail-01:
+    depends_on:
+      snail-mysql-cluster:
+        condition: service_healthy
+    container_name: snail-01
+    build:
+      context: .
+      dockerfile: ./Dockerfile-snail-job
+    image: nail-job:1.2.0
+    volumes:
+      - snail_cluster_01_log:/snailjob/server/data/log
+    ports:
+      - 18080:8080
+      - 11788:1788
+    networks:
+      - snail_cluster_network
+
+  snail-02:
+    depends_on:
+      snail-mysql-cluster:
+        condition: service_healthy
+    container_name: snail_02
+    build:
+      context: .
+      dockerfile: ./Dockerfile-snail-job
+    image: nail-job:1.2.0
+    volumes:
+      - snail_cluster_02_log:/snailjob/server/data/log
+    ports:
+      - 28080:8080
+      - 21788:1788
+    networks:
+      - snail_cluster_network
+
+  snail-03:
+    depends_on:
+      snail-mysql-cluster:
+        condition: service_healthy
+    container_name: snail-03
+    build:
+      context: .
+      dockerfile: ./Dockerfile-snail-job
+    image: nail-job:1.2.0
+    volumes:
+      - snail_cluster_03_log:/snailjob/server/data/log
+    ports:
+      - 38080:8080
+      - 31788:1788
+    networks:
+      - snail_cluster_network
+
+  snail-mysql-cluster:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-mysql
+    image: nail-job-mysql:9.1.0
+    container_name: snail-mysql-cluster
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "snail_job"
+      MYSQL_USER: "snail_job"
+      MYSQL_PASSWORD: "snail_job"
+    ports:
+      - "6606:3306"
+    volumes:
+      - "snail_mysql_cluster_data:/var/lib/mysql"
+      - "snail_mysql_cluster_conf.d:/etc/mysql/conf.d"
+    networks:
+      - snail_cluster_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+networks:
+  snail_cluster_network:
+    driver: bridge
+
+volumes:
+  snail_cluster_01_log:
+  snail_cluster_02_log:
+  snail_cluster_03_log:
+  snail_mysql_cluster_data:
+  snail_mysql_cluster_conf.d:
