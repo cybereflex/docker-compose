@@ -3,6 +3,7 @@ services:
     image: apache/rocketmq:5.3.1
     container_name: rocketmq-nameserver
     command: sh mqnamesrv
+    restart: on-failure
     environment:
       - JAVA_OPT=-Xms128m -Xmx128m -Xmn64m
       - NAMESRV_ADDR=rocketmq-nameserver:9876
@@ -10,6 +11,18 @@ services:
       - "9876:9876"
     networks:
       - rocketmq_network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/9876'",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   broker:
     image: apache/rocketmq:5.3.1
@@ -17,7 +30,8 @@ services:
     command: sh mqbroker
     restart: on-failure
     depends_on:
-      - nameserver
+      nameserver:
+        condition: service_healthy
     environment:
       - JAVA_OPT=-Xms512m -Xmx512m -Xmn256m
       - NAMESRV_ADDR=rocketmq-nameserver:9876
@@ -31,6 +45,18 @@ services:
       - rocketmq_network
     volumes:
       - rocketmq_broker_data:/opt/rocketmq/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/10911'",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   proxy:
     image: apache/rocketmq:5.3.1
@@ -40,8 +66,10 @@ services:
     networks:
       - rocketmq_network
     depends_on:
-      - broker
-      - nameserver
+      broker:
+        condition: service_healthy
+      nameserver:
+        condition: service_healthy
     ports:
       - 8080:8080
       - 8081:8081
