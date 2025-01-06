@@ -3,11 +3,13 @@ services:
     depends_on:
       snail-mysql-cluster:
         condition: service_healthy
+      snail-postgresql-cluster:
+        condition: service_healthy
     container_name: snail-01
     build:
       context: .
       dockerfile: ./Dockerfile-snail-job
-    image: nail-job:1.2.0
+    image: snail-job:1.2.0
     volumes:
       - snail_cluster_01_log:/snailjob/server/data/log
     ports:
@@ -20,11 +22,13 @@ services:
     depends_on:
       snail-mysql-cluster:
         condition: service_healthy
+      snail-postgresql-cluster:
+        condition: service_healthy
     container_name: snail_02
     build:
       context: .
       dockerfile: ./Dockerfile-snail-job
-    image: nail-job:1.2.0
+    image: snail-job:1.2.0
     volumes:
       - snail_cluster_02_log:/snailjob/server/data/log
     ports:
@@ -37,11 +41,13 @@ services:
     depends_on:
       snail-mysql-cluster:
         condition: service_healthy
+      snail-postgresql-cluster:
+        condition: service_healthy
     container_name: snail-03
     build:
       context: .
       dockerfile: ./Dockerfile-snail-job
-    image: nail-job:1.2.0
+    image: snail-job:1.2.0
     volumes:
       - snail_cluster_03_log:/snailjob/server/data/log
     ports:
@@ -50,11 +56,41 @@ services:
     networks:
       - snail_cluster_network
 
+  snail-postgresql-cluster:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-postgresql
+    image: snail-job-postgresql:13.18
+    container_name: snail-postgresql-cluster
+    restart: always
+    environment:
+      POSTGRES_USER: "snail_job"
+      POSTGRES_PASSWORD: "snail_job"
+      POSTGRES_DB: "snail_job"
+    ports:
+      - "15432:5432"
+    volumes:
+      - "snail_postgresql_data:/var/lib/postgresql/data"
+    networks:
+      - snail_cluster_network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/5432'",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   snail-mysql-cluster:
     build:
       context: .
       dockerfile: ./Dockerfile-mysql
-    image: nail-job-mysql:9.1.0
+    image: snail-job-mysql:9.1.0
     container_name: snail-mysql-cluster
     restart: always
     environment:
@@ -85,3 +121,4 @@ volumes:
   snail_cluster_03_log:
   snail_mysql_cluster_data:
   snail_mysql_cluster_conf.d:
+  snail_postgresql_data:
