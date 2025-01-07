@@ -1,14 +1,23 @@
 services:
   rabbitmq:
-    image: rabbitmq:4.0.4-management
+    image: rabbitmq:4.0.4
     container_name: rabbitmq
     restart: always
     ports:
-      - "5672:5672"
       - "15672:15672"
+      - "5672:5672"
+      - "1883:1883"
+      - "5552:5552"
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
+    command: >
+      bash -c "
+        rabbitmq-plugins enable rabbitmq_management && 
+        rabbitmq-plugins enable rabbitmq_mqtt && 
+        rabbitmq-plugins enable rabbitmq_stream &&
+        rabbitmq-server
+      "
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
