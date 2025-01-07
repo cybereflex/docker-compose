@@ -2,7 +2,7 @@ services:
   hive-postgres:
     image: postgres:13.18
     container_name: hive-postgres
-    restart: unless-stopped
+    restart: on-failure
     environment:
       POSTGRES_DB: "hive_metastore"
       POSTGRES_USER: "hive"
@@ -19,7 +19,7 @@ services:
     depends_on:
       - hive-postgres
     container_name: hive-metastore
-    restart: unless-stopped
+    restart: on-failure
     environment:
       DB_DRIVER: postgres
       SERVICE_NAME: "metastore"
@@ -43,7 +43,7 @@ services:
     depends_on:
       - hive-metastore
     container_name: hiveserver2
-    restart: unless-stopped
+    restart: on-failure
     environment:
       HIVE_SERVER2_THRIFT_PORT: 10000
       SERVICE_OPTS: "-Xmx1G -Dhive.metastore.uris=thrift://hive-metastore:9083"

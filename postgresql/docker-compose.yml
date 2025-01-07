@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:13.18
     container_name: postgres
-    restart: always
+    restart: on-failure
     environment:
       POSTGRES_USER: 'example'
       POSTGRES_PASSWORD: 'example' 
