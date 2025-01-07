@@ -13,7 +13,7 @@ services:
     env_file:
       - ./env/nacos-cluster-hostname.env
     depends_on:
-      nacos-mysql-cluster:
+      nacos-cluster-mysql:
         condition: service_healthy
     networks:
       - nacos_cluster_network
@@ -32,7 +32,7 @@ services:
     env_file:
       - ./env/nacos-cluster-hostname.env
     depends_on:
-      nacos-mysql-cluster:
+      nacos-cluster-mysql:
         condition: service_healthy
     networks:
       - nacos_cluster_network
@@ -51,13 +51,13 @@ services:
     env_file:
       - ./env/nacos-cluster-hostname.env
     depends_on:
-      nacos-mysql-cluster:
+      nacos-cluster-mysql:
         condition: service_healthy
     networks:
       - nacos_cluster_network
 
-  nacos-mysql-cluster:
-    container_name: nacos-mysql-cluster
+  nacos-cluster-mysql:
+    container_name: nacos-cluster-mysql
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -65,9 +65,7 @@ services:
     env_file:
       - ./env/mysql.env
     volumes:
-      - nacos_mysql_cluster_data:/var/lib/mysql
-    ports:
-      - "5506:3306"
+      - nacos_cluster_mysql_data:/var/lib/mysql
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       interval: 5s
@@ -77,7 +75,7 @@ services:
       - nacos_cluster_network
 
 volumes:
-  nacos_mysql_cluster_data:
+  nacos_cluster_mysql_data:
   nacos_cluster_1_logs:
   nacos_cluster_2_logs:
   nacos_cluster_3_logs:

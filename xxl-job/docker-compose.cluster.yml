@@ -1,61 +1,59 @@
 services:
-  xxl-01:
+  xxl-cluster-01:
     depends_on:
-      xxl-mysql-cluster:
+      xxl-cluster-mysql:
         condition: service_healthy
     build: 
       context: .
       dockerfile: ./Dockerfile-xxl-job
     image: xxl-job:2.4.2
-    container_name: xxl-01
+    container_name: xxl-cluster-01
     ports:
       - 18888:8080
     networks:
       - xxl_cluster_network
-  xxl-02:
+  xxl-cluster-02:
     depends_on:
-      xxl-mysql-cluster:
+      xxl-cluster-mysql:
         condition: service_healthy
     build: 
       context: .
       dockerfile: ./Dockerfile-xxl-job
     image: xxl-job:2.4.2
-    container_name: xxl-02
+    container_name: xxl-cluster-02
     ports:
       - 28888:8080
     networks:
       - xxl_cluster_network
-  xxl-03:
+  xxl-cluster-03:
     depends_on:
-      xxl-mysql-cluster:
+      xxl-cluster-mysql:
         condition: service_healthy
     build: 
       context: .
       dockerfile: ./Dockerfile-xxl-job
     image: xxl-job:2.4.2
-    container_name: xxl-03
+    container_name: xxl-cluster-03
     ports:
       - 38888:8080
     networks:
       - xxl_cluster_network
 
-  xxl-mysql-cluster:
+  xxl-cluster-mysql:
     build:
       context: .
       dockerfile: ./Dockerfile-mysql
     image: xxl-job-mysql:9.1.0
-    container_name: xxl-mysql-cluster
+    container_name: xxl-cluster-mysql
     restart: on-failure
     environment:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_DATABASE: "xxl_job"
       MYSQL_USER: "xxl_job"
       MYSQL_PASSWORD: "xxl_job"
-    ports:
-      - "7606:3306"
     volumes:
-      - "xxl_mysql_cluster_data:/var/lib/mysql"
-      - "xxl_mysql_cluster_conf.d:/etc/mysql/conf.d"
+      - "xxl_cluster_mysql_data:/var/lib/mysql"
+      - "xxl_cluster_mysql_conf.d:/etc/mysql/conf.d"
     networks:
       - xxl_cluster_network
     healthcheck:
@@ -69,5 +67,5 @@ networks:
     driver: bridge
 
 volumes:
-  xxl_mysql_cluster_data:
-  xxl_mysql_cluster_conf.d:
+  xxl_cluster_mysql_data:
+  xxl_cluster_mysql_conf.d:

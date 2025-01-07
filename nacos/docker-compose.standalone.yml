@@ -12,11 +12,11 @@ services:
     networks:
       - nacos_standalone_network
     depends_on:
-      nacos-mysql-standalone:
+      nacos-standalone-mysql:
         condition: service_healthy
         
-  nacos-mysql-standalone:
-    container_name: nacos-mysql-standalone
+  nacos-standalone-mysql:
+    container_name: nacos-standalone-mysql
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -24,9 +24,7 @@ services:
     env_file:
       - ./env/mysql.env
     volumes:
-      - nacos_mysql_standalone_data:/var/lib/mysql
-    ports:
-      - "4406:3306"
+      - nacos_standalone_mysql_data:/var/lib/mysql
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       interval: 5s
@@ -37,7 +35,7 @@ services:
 
 volumes:
   nacos_standalone_logs:
-  nacos_mysql_standalone_data:
+  nacos_standalone_mysql_data:
 
 networks:
   nacos_standalone_network:
