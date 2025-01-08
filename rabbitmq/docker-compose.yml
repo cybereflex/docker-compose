@@ -1,6 +1,6 @@
 services:
   rabbitmq:
-    image: rabbitmq:4.0.4
+    image: rabbitmq:4.0.4-management
     container_name: rabbitmq
     restart: on-failure
     ports:
@@ -13,7 +13,6 @@ services:
       - RABBITMQ_DEFAULT_PASS=guest
     command: >
       bash -c "
-        rabbitmq-plugins enable rabbitmq_management && 
         rabbitmq-plugins enable rabbitmq_mqtt && 
         rabbitmq-plugins enable rabbitmq_stream &&
         rabbitmq-server
