@@ -1,0 +1,60 @@
+services:
+  rabbitmq-cluster-01:
+    image: rabbitmq:4.0.4-management
+    container_name: rabbitmq-cluster-01
+    restart: on-failure
+    ports:
+      - "15673:15672"
+      - "5673:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_ERLANG_COOKIE=secret
+      - RABBITMQ_NODENAME=rabbitmq@rabbitmq-cluster-01
+    volumes:
+      - rabbitmq_cluster_01_data:/var/lib/rabbitmq
+    networks:
+      - rabbitmq_cluster_network
+
+  rabbitmq-cluster-02:
+    image: rabbitmq:4.0.4-management
+    container_name: rabbitmq-cluster-02
+    restart: on-failure
+    ports:
+      - "15674:15672"
+      - "5674:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_ERLANG_COOKIE=secret
+      - RABBITMQ_NODENAME=rabbitmq@rabbitmq-cluster-02
+    volumes:
+      - rabbitmq_cluster_02_data:/var/lib/rabbitmq
+    networks:
+      - rabbitmq_cluster_network
+
+  rabbitmq-cluster-03:
+    image: rabbitmq:4.0.4-management
+    container_name: rabbitmq-cluster-03
+    restart: on-failure
+    ports:
+      - "15675:15672"
+      - "5675:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_ERLANG_COOKIE=secret
+      - RABBITMQ_NODENAME=rabbitmq@rabbitmq-cluster-03
+    volumes:
+      - rabbitmq_cluster_03_data:/var/lib/rabbitmq
+    networks:
+      - rabbitmq_cluster_network
+
+volumes:
+  rabbitmq_cluster_01_data:
+  rabbitmq_cluster_02_data:
+  rabbitmq_cluster_03_data:
+
+networks:
+  rabbitmq_cluster_network:
+    driver: bridge
