@@ -1,5 +1,5 @@
 services:
-  nameserver:
+  rocketmq-nameserver:
     image: apache/rocketmq:5.3.1
     container_name: rocketmq-nameserver
     command: sh mqnamesrv
@@ -24,13 +24,13 @@ services:
       retries: 3
       start_period: 10s
 
-  broker:
+  rocketmq-broker:
     image: apache/rocketmq:5.3.1
     container_name: rocketmq-broker
     command: sh mqbroker
     restart: on-failure
     depends_on:
-      nameserver:
+      rocketmq-nameserver:
         condition: service_healthy
     environment:
       - JAVA_OPT=-Xms512m -Xmx512m -Xmn256m
@@ -58,7 +58,7 @@ services:
       retries: 3
       start_period: 20s
 
-  proxy:
+  rocketmq-proxy:
     image: apache/rocketmq:5.3.1
     container_name: rocketmq-proxy
     command: sh mqproxy
@@ -66,16 +66,16 @@ services:
     networks:
       - rocketmq_network
     depends_on:
-      broker:
+      rocketmq-broker:
         condition: service_healthy
-      nameserver:
+      rocketmq-nameserver:
         condition: service_healthy
     ports:
       - 8080:8080
       - 8081:8081
     environment:
       - NAMESRV_ADDR=rocketmq-nameserver:9876
-
+      
 networks:
   rocketmq_network:
     driver: bridge
