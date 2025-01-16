@@ -86,3 +86,11 @@ SHOW SLAVE STATUS;
 -- after mysql version 8.0.22
 SHOW REPLICA STATUS;
 ```
+
+## prometheus mysql exporter support
+
+```sql
+CREATE USER 'exporter'@'%' IDENTIFIED BY 'exporter' WITH MAX_USER_CONNECTIONS 3;
+GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%';
+FLUSH PRIVILEGES;
+```

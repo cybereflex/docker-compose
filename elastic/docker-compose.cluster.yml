@@ -109,7 +109,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
-  
+
   es02:
     container_name: es02
     depends_on:
@@ -239,18 +239,18 @@ services:
       kibana:
         condition: service_healthy
     container_name: metricbeat
-    build: 
+    build:
       context: .
       dockerfile: ./metricbeat/Dockerfile
     user: root
     volumes:
-     - es_certs:/usr/share/metricbeat/certs
-     - metricbeat_data:/usr/share/metricbeat/data
-     - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - es_certs:/usr/share/metricbeat/certs
+      - metricbeat_data:/usr/share/metricbeat/data
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     environment:
-     - ELASTIC_USER=elastic
-     - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-     - KIBANA_HOSTS=http://kibana:5601
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_HOSTS=http://kibana:5601
     networks:
       - elastic_network
 
