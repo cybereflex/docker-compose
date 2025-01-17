@@ -1,17 +1,4 @@
 services:
-  prometheus:
-    build:
-      context: ./prometheus
-      dockerfile: Dockerfile
-    image: prometheus:v3.1.0
-    container_name: prometheus
-    restart: on-failure
-    ports:
-      - 9090:9090
-    networks:
-      - grafana_network
-      - rabbitmq_cluster_rabbitmq_cluster_network
-
   node-exporter:
     image: prom/node-exporter:v1.8.2
     container_name: node-exporter
@@ -21,50 +8,24 @@ services:
     ports:
       - 9100:9100
 
-  mysqld-exporter:
+  prometheus:
     build:
-      context: ./mysqld_exporter
+      context: ./prometheus
       dockerfile: Dockerfile
-    image: mysqld-exporter:v0.16.0
-    container_name: mysqld-exporter
+    image: prometheus:v3.1.0
+    container_name: prometheus
     restart: on-failure
+    volumes:
+      - prometheus_data:/prometheus
+    ports:
+      - 9090:9090
     networks:
       - grafana_network
       - mysqld_mysql_network
-    ports:
-      - 9104:9104
-
-  postgresql-exporter:
-    image: prometheuscommunity/postgres-exporter:v0.16.0
-    container_name: postgresql-exporter
-    restart: on-failure
-    environment:
-      - DATA_SOURCE_URI=postgres:5432/example?sslmode=disable
-      - DATA_SOURCE_USER=example
-      - DATA_SOURCE_PASS=example
-    networks:
-      - grafana_network
       - postgresql_postgres_network
-    ports:
-      - 9187:9187
-
-  elasticsearch-exporter:
-    image: prometheuscommunity/elasticsearch-exporter:v1.8.0
-    container_name: elasticsearch-exporter
-    user: root
-    command:
-      - "--es.uri=https://elastic:elastic@es01:9200"
-      - "--es.ca=/certs/ca/ca.crt"
-      - "--es.client-private-key=/certs/es01/es01.key"
-      - "--es.client-cert=/certs/es01/es01.crt"
-    restart: always
-    volumes:
-      - elastic_es_certs:/certs
-    networks:
-      - grafana_network
+      - rabbitmq_cluster_rabbitmq_cluster_network
+      - kafka_cluster_kafka_cluster_network
       - elastic_elastic_network
-    ports:
-      - "9114:9114"
 
   alert-manager:
     build:
@@ -72,6 +33,8 @@ services:
       dockerfile: Dockerfile
     image: alertmanager:v0.27.0
     container_name: alert-manager
+    volumes:
+      - alert_manager_data:/alertmanager
     networks:
       - grafana_network
     ports:
@@ -90,18 +53,18 @@ services:
       - grafana_network
 
 volumes:
-  elastic_es_certs:
-    external: true
+  prometheus_data:
+  alert_manager_data:
 
 networks:
   grafana_network:
-  postgresql_postgres_network:
-    external: true
   mysqld_mysql_network:
+    external: true
+  postgresql_postgres_network:
     external: true
   rabbitmq_cluster_rabbitmq_cluster_network:
     external: true
-  elastic_elastic_network:
+  kafka_cluster_kafka_cluster_network:
     external: true
-  mongodb_mongo_network:
+  elastic_elastic_network:
     external: true

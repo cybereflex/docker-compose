@@ -11,6 +11,7 @@ services:
       - 15432:5432
     volumes:
       - hive_metastore_db:/var/lib/postgresql
+      - hive_postgres_data:/var/lib/postgresql/data
     networks:
       - hive_network
 
@@ -58,6 +59,7 @@ services:
       - hive_network
 
 volumes:
+  hive_postgres_data:
   hive_metastore_db:
   hive_warehouse:
 

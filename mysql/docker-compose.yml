@@ -15,6 +15,19 @@ services:
       - "mysql_conf.d:/etc/mysql/conf.d"
     networks:
       - "mysql_network"
+
+  mysqld-exporter:
+    build:
+      context: ./mysqld_exporter
+      dockerfile: Dockerfile
+    image: mysqld-exporter:v0.16.0
+    container_name: mysqld-exporter
+    restart: on-failure
+    networks:
+      - mysql_network
+    ports:
+      - 9104:9104
+
 networks:
   mysql_network:
     driver: bridge

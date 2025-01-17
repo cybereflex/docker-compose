@@ -254,6 +254,30 @@ services:
     networks:
       - elastic_network
 
+  elasticsearch-exporter:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    image: prometheuscommunity/elasticsearch-exporter:v1.8.0
+    container_name: elasticsearch-exporter
+    user: root
+    command:
+      - "--es.uri=https://elastic:elastic@es01:9200"
+      - "--es.ca=/certs/ca/ca.crt"
+      - "--es.client-private-key=/certs/es01/es01.key"
+      - "--es.client-cert=/certs/es01/es01.crt"
+    restart: always
+    volumes:
+      - es_certs:/certs
+    networks:
+      - elastic_network
+    ports:
+      - 9114:9114
+
 networks:
   elastic_network:
     driver: bridge

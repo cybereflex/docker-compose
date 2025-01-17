@@ -4,18 +4,32 @@ services:
     container_name: postgres
     restart: on-failure
     environment:
-      POSTGRES_USER: 'example'
-      POSTGRES_PASSWORD: 'example' 
-      POSTGRES_DB: 'example'
+      POSTGRES_USER: "example"
+      POSTGRES_PASSWORD: "example"
+      POSTGRES_DB: "example"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - "5432:5432"
     networks:
       - postgres_network
+
+  postgresql-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.16.0
+    container_name: postgresql-exporter
+    restart: on-failure
+    environment:
+      - DATA_SOURCE_URI=postgres:5432/example?sslmode=disable
+      - DATA_SOURCE_USER=example
+      - DATA_SOURCE_PASS=example
+    networks:
+      - postgres_network
+    ports:
+      - 9187:9187
+
 volumes:
   postgres_data:
-  
+
 networks:
-  postgres_network: 
+  postgres_network:
     driver: bridge
