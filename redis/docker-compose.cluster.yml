@@ -1,0 +1,154 @@
+services:
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - 5540:5540
+    networks:
+      - redis_cluster_network
+
+  redis-master:
+    image: redis:7.4.1
+    container_name: redis-master
+    restart: on-failure
+    user: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_master_data:/data
+    networks:
+      - redis_cluster_network
+    command:
+      - "redis-server"
+      - "--appendonly yes"
+      - "--repl-diskless-load on-empty-db"
+      - "--protected-mode no"
+      - "--replica-announce-ip ${HOST}"
+      - "--replica-announce-port 6379"
+
+  redis-slave-01:
+    image: redis:7.4.1
+    container_name: redis-slave-01
+    restart: on-failure
+    user: redis
+    ports:
+      - 6380:6380
+    volumes:
+      - redis_slave_01_data:/data
+    networks:
+      - redis_cluster_network
+    depends_on:
+      - redis-master
+    command:
+      - "redis-server"
+      - "--port 6380"
+      - "--replicaof ${HOST} 6379"
+      - "--appendonly yes"
+      - "--repl-diskless-load on-empty-db"
+      - "--protected-mode no"
+      - "--replica-announce-ip ${HOST}"
+      - "--replica-announce-port 6380"
+
+  redis-slave-02:
+    image: redis:7.4.1
+    container_name: redis-slave-02
+    restart: on-failure
+    user: redis
+    ports:
+      - 6381:6381
+    volumes:
+      - redis_slave_02_data:/data
+    networks:
+      - redis_cluster_network
+    depends_on:
+      - redis-master
+    command:
+      - "redis-server"
+      - "--port 6381"
+      - "--replicaof ${HOST} 6379"
+      - "--appendonly yes"
+      - "--repl-diskless-load on-empty-db"
+      - "--protected-mode no"
+      - "--replica-announce-ip ${HOST}"
+      - "--replica-announce-port 6381"
+
+  redis-sentinel-01:
+    image: redis:7.4.1
+    container_name: redis-sentinel-01
+    restart: on-failure
+    ports:
+      - 26379:26379
+    networks:
+      - redis_cluster_network
+    depends_on:
+      - redis-master
+    command: >
+      bash -c '
+        echo "protected-mode no" >> /etc/sentinel.conf &&
+        echo "port 26379" >> /etc/sentinel.conf &&
+        echo "sentinel announce-ip ${HOST}" >> /etc/sentinel.conf &&
+        echo "sentinel announce-port 26379" >> /etc/sentinel.conf &&
+        echo "sentinel monitor redis-docker ${HOST} 6379 2" >> /etc/sentinel.conf &&
+        echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf &&
+        echo "sentinel down-after-milliseconds redis-docker 10000" >> /etc/sentinel.conf &&
+        echo "sentinel failover-timeout redis-docker 10000" >> /etc/sentinel.conf &&
+        echo "sentinel parallel-syncs redis-docker 1" >> /etc/sentinel.conf &&
+        redis-sentinel /etc/sentinel.conf --sentinel
+      '
+
+  redis-sentinel-02:
+    image: redis:7.4.1
+    container_name: redis-sentinel-02
+    restart: on-failure
+    ports:
+      - 26380:26380
+    networks:
+      - redis_cluster_network
+    depends_on:
+      - redis-master
+    command: >
+      bash -c '
+        echo "protected-mode no" >> /etc/sentinel.conf &&
+        echo "port 26380" >> /etc/sentinel.conf &&
+        echo "sentinel announce-ip ${HOST}" >> /etc/sentinel.conf &&
+        echo "sentinel announce-port 26380" >> /etc/sentinel.conf &&
+        echo "sentinel monitor redis-docker ${HOST} 6379 2" >> /etc/sentinel.conf &&
+        echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf &&
+        echo "sentinel down-after-milliseconds redis-docker 10000" >> /etc/sentinel.conf &&
+        echo "sentinel failover-timeout redis-docker 10000" >> /etc/sentinel.conf &&
+        echo "sentinel parallel-syncs redis-docker 1" >> /etc/sentinel.conf &&
+        redis-sentinel /etc/sentinel.conf --sentinel
+      '
+
+  redis-sentinel-03:
+    image: redis:7.4.1
+    container_name: redis-sentinel-03
+    restart: on-failure
+    ports:
+      - 26381:26381
+    networks:
+      - redis_cluster_network
+    depends_on:
+      - redis-master
+    command: >
+      bash -c '
+        echo "protected-mode no" >> /etc/sentinel.conf &&
+        echo "port 26381" >> /etc/sentinel.conf &&
+        echo "sentinel announce-ip ${HOST}" >> /etc/sentinel.conf &&
+        echo "sentinel announce-port 26381" >> /etc/sentinel.conf &&
+        echo "sentinel monitor redis-docker ${HOST} 6379 2" >> /etc/sentinel.conf &&
+        echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf &&
+        echo "sentinel down-after-milliseconds redis-docker 10000" >> /etc/sentinel.conf &&
+        echo "sentinel failover-timeout redis-docker 10000" >> /etc/sentinel.conf &&
+        echo "sentinel parallel-syncs redis-docker 1" >> /etc/sentinel.conf &&
+        redis-sentinel /etc/sentinel.conf --sentinel
+      '
+
+volumes:
+  redis_master_data:
+  redis_slave_01_data:
+  redis_slave_02_data:
+
+networks:
+  redis_cluster_network:
+    driver: bridge
