@@ -116,7 +116,7 @@ services:
         echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf &&
         echo "sentinel down-after-milliseconds redis-docker 10000" >> /etc/sentinel.conf &&
         echo "sentinel failover-timeout redis-docker 10000" >> /etc/sentinel.conf &&
-        echo "sentinel parallel-syncs redis-docker 1" >> /etc/sentinel.conf &&
+        echo "sentinel parallel-syncs redis-docker 2" >> /etc/sentinel.conf &&
         redis-sentinel /etc/sentinel.conf --sentinel
       '
 
@@ -140,7 +140,7 @@ services:
         echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf &&
         echo "sentinel down-after-milliseconds redis-docker 10000" >> /etc/sentinel.conf &&
         echo "sentinel failover-timeout redis-docker 10000" >> /etc/sentinel.conf &&
-        echo "sentinel parallel-syncs redis-docker 1" >> /etc/sentinel.conf &&
+        echo "sentinel parallel-syncs redis-docker 3" >> /etc/sentinel.conf &&
         redis-sentinel /etc/sentinel.conf --sentinel
       '
 
