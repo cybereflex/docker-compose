@@ -1,0 +1,16 @@
+services:
+  nexus:
+    image: sonatype/nexus3:3.77.1
+    container_name: nexus
+    restart: on-failure
+    ports:
+      - 38081:8081
+    volumes:
+      - nexus_data:/nexus-data
+
+volumes:
+  nexus_data:
+
+networks:
+  nexus_network:
+    driver: bridge
