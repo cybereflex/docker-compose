@@ -75,7 +75,7 @@ services:
     networks:
       - elastic_network
     ports:
-      - ${ES_PORT}:9200
+      - 9200:9200
     environment:
       - node.name=es01
       - cluster.name=${CLUSTER_NAME}
@@ -121,6 +121,8 @@ services:
       - es_data_02:/usr/share/elasticsearch/data
     networks:
       - elastic_network
+    ports:
+      - 19200:9200
     environment:
       - node.name=es02
       - cluster.name=${CLUSTER_NAME}
@@ -166,6 +168,8 @@ services:
       - es_data_03:/usr/share/elasticsearch/data
     networks:
       - elastic_network
+    ports:
+      - 29200:9200
     environment:
       - node.name=es03
       - cluster.name=${CLUSTER_NAME}
@@ -241,7 +245,7 @@ services:
     container_name: metricbeat
     build:
       context: .
-      dockerfile: ./metricbeat/Dockerfile
+      dockerfile: ./metricbeat-ssl/Dockerfile
     user: root
     volumes:
       - es_certs:/usr/share/metricbeat/certs

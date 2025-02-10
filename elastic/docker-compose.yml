@@ -1,0 +1,152 @@
+services:
+  es01:
+    container_name: es01
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - es_data_01:/usr/share/elasticsearch/data
+    networks:
+      - elastic_network
+    ports:
+      - 9200:9200
+    environment:
+      - node.name=es01
+      - cluster.name=${CLUSTER_NAME}
+      - cluster.initial_master_nodes=es01,es02,es03
+      - discovery.seed_hosts=es02,es03
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.license.self_generated.type=${LICENSE}
+      - xpack.ml.use_auto_machine_memory_percent=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    mem_limit: ${MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  es02:
+    container_name: es02
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - es_data_02:/usr/share/elasticsearch/data
+    networks:
+      - elastic_network
+    ports:
+      - 19200:9200
+    environment:
+      - node.name=es02
+      - cluster.name=${CLUSTER_NAME}
+      - cluster.initial_master_nodes=es01,es02,es03
+      - discovery.seed_hosts=es01,es03
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.license.self_generated.type=${LICENSE}
+      - xpack.ml.use_auto_machine_memory_percent=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    mem_limit: ${MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  es03:
+    container_name: es03
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - es_data_03:/usr/share/elasticsearch/data
+    networks:
+      - elastic_network
+    ports:
+      - 29200:9200
+    environment:
+      - node.name=es03
+      - cluster.name=${CLUSTER_NAME}
+      - cluster.initial_master_nodes=es01,es02,es03
+      - discovery.seed_hosts=es01,es02
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.license.self_generated.type=${LICENSE}
+      - xpack.ml.use_auto_machine_memory_percent=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    mem_limit: ${MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  kibana:
+    container_name: kibana
+    depends_on:
+      - es01
+      - es02
+      - es03
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    volumes:
+      - kibana_data:/usr/share/kibana/data
+    networks:
+      - elastic_network
+    ports:
+      - ${KIBANA_PORT}:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=["http://es01:9200","http://es02:9200","http://es03:9200"]
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+    mem_limit: ${MEM_LIMIT}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  metricbeat:
+    depends_on:
+      kibana:
+        condition: service_healthy
+    container_name: metricbeat
+    build:
+      context: .
+      dockerfile: ./metricbeat/Dockerfile
+    user: root
+    volumes:
+      - es_certs:/usr/share/metricbeat/certs
+      - metricbeat_data:/usr/share/metricbeat/data
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_HOSTS=http://kibana:5601
+    networks:
+      - elastic_network
+
+  elasticsearch-exporter:
+    depends_on:
+      - es01
+      - es02
+      - es03
+    image: prometheuscommunity/elasticsearch-exporter:v1.8.0
+    container_name: elasticsearch-exporter
+    user: root
+    command:
+      - "--es.uri=http://elastic:elastic@es01:9200"
+    restart: always
+    networks:
+      - elastic_network
+    ports:
+      - 9114:9114
+
+networks:
+  elastic_network:
+    driver: bridge
+
+volumes:
+  es_certs:
+  es_data_01:
+  es_data_02:
+  es_data_03:
+  kibana_data:
+  metricbeat_data:
