@@ -45,7 +45,7 @@ services:
       dockerfile: ./Dockerfile-mysql
     image: xxl-job-mysql:9.1.0
     container_name: xxl-cluster-mysql
-    restart: on-failure
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_DATABASE: "xxl_job"

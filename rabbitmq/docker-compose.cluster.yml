@@ -2,7 +2,7 @@ services:
   rabbitmq-cluster-01:
     image: rabbitmq:4.0.5-management
     container_name: rabbitmq-cluster-01
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "15673:15672"
       - "5673:5672"
@@ -25,7 +25,7 @@ services:
   rabbitmq-cluster-02:
     image: rabbitmq:4.0.5-management
     container_name: rabbitmq-cluster-02
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "15674:15672"
       - "5674:5672"
@@ -48,7 +48,7 @@ services:
   rabbitmq-cluster-03:
     image: rabbitmq:4.0.5-management
     container_name: rabbitmq-cluster-03
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "15675:15672"
       - "5675:5672"

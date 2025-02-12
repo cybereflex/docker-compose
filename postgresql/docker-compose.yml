@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:13.18
     container_name: postgres
-    restart: on-failure
+    restart: unless-stopped
     environment:
       POSTGRES_USER: "example"
       POSTGRES_PASSWORD: "example"
@@ -17,7 +17,7 @@ services:
   postgresql-exporter:
     image: prometheuscommunity/postgres-exporter:v0.16.0
     container_name: postgresql-exporter
-    restart: on-failure
+    restart: unless-stopped
     environment:
       - DATA_SOURCE_URI=postgres:5432/example?sslmode=disable
       - DATA_SOURCE_USER=example

@@ -133,7 +133,7 @@ services:
     user: root
     command:
       - "--es.uri=http://elastic:elastic@es01:9200"
-    restart: always
+    restart: unless-stopped
     networks:
       - elastic_network
     ports:

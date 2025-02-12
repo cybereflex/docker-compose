@@ -2,7 +2,7 @@ services:
   rabbitmq-standalone:
     image: rabbitmq:4.0.5-management
     container_name: rabbitmq-standalone
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "15672:15672"
       - "5672:5672"

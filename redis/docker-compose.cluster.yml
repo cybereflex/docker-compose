@@ -10,7 +10,7 @@ services:
   redis-master:
     image: redis:7.4.1
     container_name: redis-master
-    restart: on-failure
+    restart: unless-stopped
     user: redis
     ports:
       - 6379:6379
@@ -29,7 +29,7 @@ services:
   redis-slave-01:
     image: redis:7.4.1
     container_name: redis-slave-01
-    restart: on-failure
+    restart: unless-stopped
     user: redis
     ports:
       - 6380:6380
@@ -52,7 +52,7 @@ services:
   redis-slave-02:
     image: redis:7.4.1
     container_name: redis-slave-02
-    restart: on-failure
+    restart: unless-stopped
     user: redis
     ports:
       - 6381:6381
@@ -75,7 +75,7 @@ services:
   redis-sentinel-01:
     image: redis:7.4.1
     container_name: redis-sentinel-01
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - 26379:26379
     networks:
@@ -100,7 +100,7 @@ services:
   redis-sentinel-02:
     image: redis:7.4.1
     container_name: redis-sentinel-02
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - 26380:26380
     networks:
@@ -125,7 +125,7 @@ services:
   redis-sentinel-03:
     image: redis:7.4.1
     container_name: redis-sentinel-03
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - 26381:26381
     networks:

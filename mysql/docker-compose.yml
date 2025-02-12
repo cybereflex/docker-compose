@@ -2,7 +2,7 @@ services:
   mysql:
     image: mysql:9.1.0
     container_name: mysql
-    restart: on-failure
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_DATABASE: "example"
@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
     image: mysqld-exporter:v0.16.0
     container_name: mysqld-exporter
-    restart: on-failure
+    restart: unless-stopped
     networks:
       - mysql_network
     ports:

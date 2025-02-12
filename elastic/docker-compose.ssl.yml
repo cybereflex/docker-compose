@@ -274,7 +274,7 @@ services:
       - "--es.ca=/certs/ca/ca.crt"
       - "--es.client-private-key=/certs/es01/es01.key"
       - "--es.client-cert=/certs/es01/es01.crt"
-    restart: always
+    restart: unless-stopped
     volumes:
       - es_certs:/certs
     networks:

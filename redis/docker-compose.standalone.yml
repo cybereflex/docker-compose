@@ -2,7 +2,7 @@ services:
   redis:
     image: redis:7.4.1
     container_name: redis
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:

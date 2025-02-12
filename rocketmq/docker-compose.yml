@@ -3,7 +3,7 @@ services:
     image: apache/rocketmq:5.3.1
     container_name: rocketmq-nameserver
     command: sh mqnamesrv
-    restart: on-failure
+    restart: unless-stopped
     environment:
       - JAVA_OPT=-Xms128m -Xmx128m -Xmn64m
       - NAMESRV_ADDR=rocketmq-nameserver:9876
@@ -28,7 +28,7 @@ services:
     image: apache/rocketmq:5.3.1
     container_name: rocketmq-broker
     command: sh mqbroker
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       rocketmq-nameserver:
         condition: service_healthy
@@ -62,7 +62,7 @@ services:
     image: apache/rocketmq:5.3.1
     container_name: rocketmq-proxy
     command: sh mqproxy
-    restart: on-failure
+    restart: unless-stopped
     networks:
       - rocketmq_network
     depends_on:

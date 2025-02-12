@@ -62,7 +62,7 @@ services:
       dockerfile: ./Dockerfile-postgresql
     image: snail-job-postgresql:13.18
     container_name: snail-cluster-postgresql
-    restart: on-failure
+    restart: unless-stopped
     environment:
       POSTGRES_USER: "snail_job"
       POSTGRES_PASSWORD: "snail_job"
@@ -84,7 +84,7 @@ services:
       dockerfile: ./Dockerfile-mysql
     image: snail-job-mysql:9.1.0
     container_name: snail-cluster-mysql
-    restart: on-failure
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_DATABASE: "snail_job"

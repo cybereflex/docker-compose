@@ -2,7 +2,7 @@ services:
   node-exporter:
     image: prom/node-exporter:v1.8.2
     container_name: node-exporter
-    restart: on-failure
+    restart: unless-stopped
     networks:
       - grafana_network
     ports:
@@ -14,7 +14,7 @@ services:
       dockerfile: Dockerfile
     image: prometheus:v3.1.0
     container_name: prometheus
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - prometheus_data:/prometheus
     ports:
@@ -43,7 +43,7 @@ services:
   grafana:
     image: grafana/grafana:11.4.0
     container_name: grafana
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - 3000:3000
     environment:
