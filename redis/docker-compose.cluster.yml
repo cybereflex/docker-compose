@@ -78,6 +78,8 @@ services:
     restart: unless-stopped
     ports:
       - 26379:26379
+    volumes:
+      - redis_sentinel_01_data:/data
     networks:
       - redis_cluster_network
     depends_on:
@@ -103,6 +105,8 @@ services:
     restart: unless-stopped
     ports:
       - 26380:26380
+    volumes:
+      - redis_sentinel_02_data:/data
     networks:
       - redis_cluster_network
     depends_on:
@@ -128,6 +132,8 @@ services:
     restart: unless-stopped
     ports:
       - 26381:26381
+    volumes:
+      - redis_sentinel_03_data:/data
     networks:
       - redis_cluster_network
     depends_on:
@@ -151,6 +157,9 @@ volumes:
   redis_master_data:
   redis_slave_01_data:
   redis_slave_02_data:
+  redis_sentinel_01_data:
+  redis_sentinel_02_data:
+  redis_sentinel_03_data:
 
 networks:
   redis_cluster_network:
