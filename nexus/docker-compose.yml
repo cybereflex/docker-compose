@@ -4,9 +4,9 @@ services:
     container_name: nexus
     restart: unless-stopped
     ports:
-      - 38081:8081
-      - 20000:20000
-      - 30000:30000
+      - 38081:8081  # web ui
+      - 20000:20000 # used in docker-proxy
+      - 30000:30000 # used in docker-group
     volumes:
       - nexus_data:/nexus-data
 
