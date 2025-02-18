@@ -23,6 +23,17 @@ services:
       memlock:
         soft: -1
         hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/9200'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
 
   es02:
     container_name: es02
@@ -48,6 +59,17 @@ services:
       memlock:
         soft: -1
         hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/9200'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
 
   es03:
     container_name: es03
@@ -73,13 +95,27 @@ services:
       memlock:
         soft: -1
         hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/9200'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
 
   kibana:
     container_name: kibana
     depends_on:
-      - es01
-      - es02
-      - es03
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     volumes:
       - kibana_data:/usr/share/kibana/data
@@ -109,8 +145,10 @@ services:
         condition: service_healthy
     container_name: metricbeat
     build:
-      context: .
-      dockerfile: ./metricbeat/Dockerfile
+      context: ./metricbeat
+      args:
+        - STACK_VERSION=${STACK_VERSION}
+      dockerfile: Dockerfile
     user: root
     volumes:
       - es_certs:/usr/share/metricbeat/certs
@@ -123,11 +161,39 @@ services:
     networks:
       - elastic_network
 
+  logstash:
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    container_name: logstash
+    build: 
+      context: ./logstash
+      args:
+        - STACK_VERSION=${STACK_VERSION}
+      dockerfile: Dockerfile
+    user: root
+    ports:
+      - 5044:5044
+      - 12000:12000
+    networks:
+      - elastic_network
+    restart: unless-stopped
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+      LOGSTASH_INTERNAL_PASSWORD: ${ELASTIC_PASSWORD}
+
   elasticsearch-exporter:
     depends_on:
-      - es01
-      - es02
-      - es03
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
     image: prometheuscommunity/elasticsearch-exporter:v1.8.0
     container_name: elasticsearch-exporter
     user: root
