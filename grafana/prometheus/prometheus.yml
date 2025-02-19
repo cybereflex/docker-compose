@@ -40,3 +40,9 @@ scrape_configs:
           - kafka-broker-01:11001
           - kafka-broker-02:11002
           - kafka-broker-03:11003
+  - job_name: scaffold-app
+    metrics_path: "/scaffold-app/actuator/prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets: 
+          - 10.100.133.141:58888
