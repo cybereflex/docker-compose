@@ -3,7 +3,7 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    image: docker-dashboard:1.8.8
+    image: sentinel-dashboard:1.8.8
     container_name: sentinel-dashboard
     ports:
       - 15566:15566
