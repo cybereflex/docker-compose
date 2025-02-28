@@ -19,6 +19,7 @@ services:
       - xpack.ml.use_auto_machine_memory_percent=true
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     mem_limit: ${MEM_LIMIT}
+    restart: unless-stopped
     ulimits:
       memlock:
         soft: -1
@@ -55,6 +56,7 @@ services:
       - xpack.ml.use_auto_machine_memory_percent=true
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     mem_limit: ${MEM_LIMIT}
+    restart: unless-stopped
     ulimits:
       memlock:
         soft: -1
@@ -91,6 +93,7 @@ services:
       - xpack.ml.use_auto_machine_memory_percent=true
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     mem_limit: ${MEM_LIMIT}
+    restart: unless-stopped
     ulimits:
       memlock:
         soft: -1
@@ -117,6 +120,7 @@ services:
       es03:
         condition: service_healthy
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    restart: unless-stopped
     volumes:
       - kibana_data:/usr/share/kibana/data
     networks:
@@ -144,6 +148,7 @@ services:
       kibana:
         condition: service_healthy
     container_name: metricbeat
+    restart: unless-stopped
     build:
       context: ./metricbeat
       args:
