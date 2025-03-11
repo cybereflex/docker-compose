@@ -2,6 +2,7 @@ services:
   zipkin:
     image: openzipkin/zipkin:latest
     container_name: zipkin
+    restart: unless-stopped
     environment:
       - STORAGE_TYPE=elasticsearch
       - ES_HOSTS=es01:9200,es02:9200,es03:9200
