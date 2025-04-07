@@ -1,0 +1,20 @@
+services:
+  oracle-database:
+    container_name: oracle-database
+    image: container-registry.oracle.com/database/free:latest
+    environment:
+      - ORACLE_PWD=example
+    networks:
+      - oracle_network
+    ports:
+      - 1521:1521
+    volumes:
+      - oracle_db_data:/opt/oracle/oradata
+
+networks:
+  oracle_network:
+    driver: bridge
+
+volumes:
+  oracle_db_data:
+    
