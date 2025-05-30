@@ -9,6 +9,8 @@ services:
       - 30000:30000 # used in docker-group
     volumes:
       - nexus_data:/nexus-data
+    networks:
+      - nexus_network
 
 volumes:
   nexus_data:
