@@ -2,6 +2,7 @@ services:
   jobmanager:
     build:
       context: .
+      dockerfile: Dockerfile
     user: flink:flink
     container_name: jobmanager
     ports:
@@ -15,6 +16,7 @@ services:
   taskmanager-1:
     build:
       context: .
+      dockerfile: Dockerfile
     user: flink:flink
     container_name: taskmanager-1
     depends_on:
@@ -25,10 +27,11 @@ services:
     command: taskmanager
     networks: 
       - flink_network
-      
+
   taskmanager-2:
     build:
       context: .
+      dockerfile: Dockerfile
     user: flink:flink
     container_name: taskmanager-2
     depends_on:
