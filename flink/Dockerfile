@@ -1,4 +1,4 @@
-FROM flink:2.0.0
+FROM flink:2.0.0-scala_2.12
 
 COPY ./lib /opt/flink/lib
 

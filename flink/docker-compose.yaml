@@ -8,37 +8,26 @@ services:
     ports:
       - 8081:8081
     environment:
-      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - | 
+        FLINK_PROPERTIES=
+        JOB_MANAGER_RPC_ADDRESS=jobmanager
     command: jobmanager
     networks: 
       - flink_network
 
-  taskmanager-1:
+  taskmanager:
     build:
       context: .
       dockerfile: Dockerfile
     user: flink:flink
-    container_name: taskmanager-1
+    container_name: taskmanager
     depends_on:
       - jobmanager
     environment:
-      - JOB_MANAGER_RPC_ADDRESS=jobmanager
-      - TASK_MANAGER_NUMBER_OF_TASK_SLOTS=4
-    command: taskmanager
-    networks: 
-      - flink_network
-
-  taskmanager-2:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    user: flink:flink
-    container_name: taskmanager-2
-    depends_on:
-      - jobmanager
-    environment:
-      - JOB_MANAGER_RPC_ADDRESS=jobmanager
-      - TASK_MANAGER_NUMBER_OF_TASK_SLOTS=4
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2  
     command: taskmanager
     networks: 
       - flink_network
