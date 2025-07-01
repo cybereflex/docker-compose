@@ -8,9 +8,7 @@ services:
     ports:
       - 8081:8081
     environment:
-      - | 
-        FLINK_PROPERTIES=
-        JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
     command: jobmanager
     networks: 
       - flink_network
@@ -24,10 +22,8 @@ services:
     depends_on:
       - jobmanager
     environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2  
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - TASK_MANAGER_NUMBER_OF_TASK_SLOTS=4
     command: taskmanager
     networks: 
       - flink_network
