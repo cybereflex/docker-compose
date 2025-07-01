@@ -3,9 +3,6 @@ services:
     image: redis:7.4.1
     container_name: redis
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - "6379:6379"
     volumes:

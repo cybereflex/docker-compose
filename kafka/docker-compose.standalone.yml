@@ -3,9 +3,6 @@ services:
     image: apache/kafka:3.9.0
     container_name: kafka
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - 9092:9092
     networks:

@@ -3,9 +3,6 @@ services:
     image: rabbitmq:4.0.5-management
     container_name: rabbitmq-standalone
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - "15672:15672"
       - "5672:5672"

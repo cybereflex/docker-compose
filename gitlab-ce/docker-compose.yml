@@ -3,9 +3,6 @@ services:
     image: gitlab/gitlab-ce:latest
     container_name: gitlab
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     networks:
       - gitlab_network
     environment:

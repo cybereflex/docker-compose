@@ -1,0 +1,4 @@
+rest.port: 8081
+jobmanager.rpc.address: jobmanager
+taskmanager.numberOfTaskSlots: 4
+parallelism.default: 2

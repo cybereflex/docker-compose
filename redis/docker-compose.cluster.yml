@@ -1,23 +1,17 @@
 services:
   redis-insight:
+    restart: unless-stopped
     image: redis/redisinsight:latest
     container_name: redis-insight
-    restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - 5540:5540
     networks:
       - redis_cluster_network
 
   redis-master:
+    restart: unless-stopped
     image: redis:7.4.1
     container_name: redis-master
-    restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     user: redis
     ports:
       - 6379:6379
@@ -34,12 +28,9 @@ services:
       - "--replica-announce-port 6379"
 
   redis-slave-01:
+    restart: unless-stopped
     image: redis:7.4.1
     container_name: redis-slave-01
-    restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     user: redis
     ports:
       - 6380:6380
@@ -60,12 +51,9 @@ services:
       - "--replica-announce-port 6380"
 
   redis-slave-02:
+    restart: unless-stopped
     image: redis:7.4.1
     container_name: redis-slave-02
-    restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     user: redis
     ports:
       - 6381:6381
@@ -86,12 +74,9 @@ services:
       - "--replica-announce-port 6381"
 
   redis-sentinel-01:
+    restart: unless-stopped
     image: redis:7.4.1
     container_name: redis-sentinel-01
-    restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - 26379:26379
     volumes:
@@ -108,7 +93,7 @@ services:
         echo "sentinel announce-ip ${LOCAL_IP}" >> /etc/sentinel.conf &&
         echo "sentinel announce-port 26379" >> /etc/sentinel.conf &&
         echo "sentinel monitor redis-docker ${LOCAL_IP} 6379 2" >> /etc/sentinel.conf &&
-        echo "sentinel resolve-LOCAL_IPnames yes" >> /etc/sentinel.conf &&
+        echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf &&
         echo "sentinel down-after-milliseconds redis-docker 10000" >> /etc/sentinel.conf &&
         echo "sentinel failover-timeout redis-docker 10000" >> /etc/sentinel.conf &&
         echo "sentinel parallel-syncs redis-docker 1" >> /etc/sentinel.conf &&
@@ -116,12 +101,9 @@ services:
       '
 
   redis-sentinel-02:
+    restart: unless-stopped
     image: redis:7.4.1
     container_name: redis-sentinel-02
-    restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - 26380:26380
     volumes:
@@ -138,7 +120,7 @@ services:
         echo "sentinel announce-ip ${LOCAL_IP}" >> /etc/sentinel.conf &&
         echo "sentinel announce-port 26380" >> /etc/sentinel.conf &&
         echo "sentinel monitor redis-docker ${LOCAL_IP} 6379 2" >> /etc/sentinel.conf &&
-        echo "sentinel resolve-LOCAL_IPnames yes" >> /etc/sentinel.conf &&
+        echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf &&
         echo "sentinel down-after-milliseconds redis-docker 10000" >> /etc/sentinel.conf &&
         echo "sentinel failover-timeout redis-docker 10000" >> /etc/sentinel.conf &&
         echo "sentinel parallel-syncs redis-docker 2" >> /etc/sentinel.conf &&
@@ -146,12 +128,9 @@ services:
       '
 
   redis-sentinel-03:
+    restart: unless-stopped
     image: redis:7.4.1
     container_name: redis-sentinel-03
-    restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - 26381:26381
     volumes:
@@ -168,7 +147,7 @@ services:
         echo "sentinel announce-ip ${LOCAL_IP}" >> /etc/sentinel.conf &&
         echo "sentinel announce-port 26381" >> /etc/sentinel.conf &&
         echo "sentinel monitor redis-docker ${LOCAL_IP} 6379 2" >> /etc/sentinel.conf &&
-        echo "sentinel resolve-LOCAL_IPnames yes" >> /etc/sentinel.conf &&
+        echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf &&
         echo "sentinel down-after-milliseconds redis-docker 10000" >> /etc/sentinel.conf &&
         echo "sentinel failover-timeout redis-docker 10000" >> /etc/sentinel.conf &&
         echo "sentinel parallel-syncs redis-docker 3" >> /etc/sentinel.conf &&

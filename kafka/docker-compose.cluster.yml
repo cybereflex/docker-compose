@@ -3,9 +3,6 @@ services:
     image: apache/kafka:3.9.0
     container_name: kafka-controller-01
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     networks:
       - kafka_cluster_network
     volumes:
@@ -25,9 +22,6 @@ services:
     image: apache/kafka:3.9.0
     container_name: kafka-controller-02
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     networks:
       - kafka_cluster_network
     volumes:
@@ -47,9 +41,6 @@ services:
     image: apache/kafka:3.9.0
     container_name: kafka-controller-03
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     networks:
       - kafka_cluster_network
     volumes:
@@ -72,9 +63,6 @@ services:
     image: kafka:3.9.0
     container_name: kafka-broker-01
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     networks:
       - kafka_cluster_network
     volumes:
@@ -88,7 +76,7 @@ services:
       KAFKA_NODE_ID: 4
       KAFKA_PROCESS_ROLES: broker
       KAFKA_LISTENERS: "PLAINTEXT://:19092"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://10.100.133.11:19092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${LOCAL_IP}:19092"
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
@@ -107,9 +95,6 @@ services:
     image: kafka:3.9.0
     container_name: kafka-broker-02
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     networks:
       - kafka_cluster_network
     volumes:
@@ -123,7 +108,7 @@ services:
       KAFKA_NODE_ID: 5
       KAFKA_PROCESS_ROLES: broker
       KAFKA_LISTENERS: "PLAINTEXT://:29092"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://10.100.133.11:29092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${LOCAL_IP}:29092"
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
@@ -142,9 +127,6 @@ services:
     image: kafka:3.9.0
     container_name: kafka-broker-03
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     networks:
       - kafka_cluster_network
     volumes:
@@ -158,7 +140,7 @@ services:
       KAFKA_NODE_ID: 6
       KAFKA_PROCESS_ROLES: broker
       KAFKA_LISTENERS: "PLAINTEXT://:39092"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://10.100.133.11:39092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${LOCAL_IP}:39092"
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
@@ -174,9 +156,6 @@ services:
     image: ghcr.io/kafbat/kafka-ui:latest
     restart: unless-stopped
     container_name: kafbat-ui
-    env_file:
-      - path: ../.env
-        required: true
     depends_on:
       - kafka-broker-01
       - kafka-broker-02

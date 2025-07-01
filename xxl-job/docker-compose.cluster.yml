@@ -8,9 +8,6 @@ services:
       dockerfile: ./Dockerfile-xxl-job
     image: xxl-job:2.4.2
     container_name: xxl-cluster-01
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - 18888:8080
     networks:
@@ -24,9 +21,6 @@ services:
       dockerfile: ./Dockerfile-xxl-job
     image: xxl-job:2.4.2
     container_name: xxl-cluster-02
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - 28888:8080
     networks:
@@ -40,9 +34,6 @@ services:
       dockerfile: ./Dockerfile-xxl-job
     image: xxl-job:2.4.2
     container_name: xxl-cluster-03
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - 38888:8080
     networks:
@@ -55,9 +46,6 @@ services:
     image: xxl-job-mysql:9.1.0
     container_name: xxl-cluster-mysql
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     environment:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_DATABASE: "xxl_job"

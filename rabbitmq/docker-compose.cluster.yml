@@ -3,9 +3,6 @@ services:
     image: rabbitmq:4.0.5-management
     container_name: rabbitmq-cluster-01
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - "15673:15672"
       - "5673:5672"
@@ -29,9 +26,6 @@ services:
     image: rabbitmq:4.0.5-management
     container_name: rabbitmq-cluster-02
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - "15674:15672"
       - "5674:5672"
@@ -55,9 +49,6 @@ services:
     image: rabbitmq:4.0.5-management
     container_name: rabbitmq-cluster-03
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - "15675:15672"
       - "5675:5672"

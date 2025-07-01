@@ -3,9 +3,6 @@ services:
     image: mysql:9.1.0
     container_name: mysql
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     environment:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_DATABASE: "example"
@@ -26,9 +23,6 @@ services:
     image: mysqld-exporter:v0.16.0
     container_name: mysqld-exporter
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     networks:
       - mysql_network
     ports:

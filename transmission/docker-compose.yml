@@ -2,9 +2,6 @@ services:
   transmission:
     image: linuxserver/transmission:latest
     container_name: transmission
-    env_file:
-      - path: ../.env
-        required: true
     environment:
       - PUID=1000
       - PGID=1000

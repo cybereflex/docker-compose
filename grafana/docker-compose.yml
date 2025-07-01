@@ -3,9 +3,6 @@ services:
     image: prom/node-exporter:v1.8.2
     container_name: node-exporter
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     networks:
       - grafana_network
     ports:
@@ -18,9 +15,6 @@ services:
     image: prometheus:v3.1.0
     container_name: prometheus
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     volumes:
       - prometheus_data:/prometheus
     ports:
@@ -39,9 +33,6 @@ services:
       dockerfile: Dockerfile
     image: alertmanager:v0.27.0
     container_name: alert-manager
-    env_file:
-      - path: ../.env
-        required: true
     volumes:
       - alert_manager_data:/alertmanager
     networks:
@@ -53,9 +44,6 @@ services:
     image: grafana/grafana:11.4.0
     container_name: grafana
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     ports:
       - 3000:3000
     environment:

@@ -6,9 +6,6 @@ services:
       snail-cluster-postgresql:
         condition: service_healthy
     container_name: snail-cluster-01
-    env_file:
-      - path: ../.env
-        required: true
     build:
       context: .
       dockerfile: ./Dockerfile-snail-job
@@ -28,9 +25,6 @@ services:
       snail-cluster-postgresql:
         condition: service_healthy
     container_name: snail-cluster-02
-    env_file:
-      - path: ../.env
-        required: true
     build:
       context: .
       dockerfile: ./Dockerfile-snail-job
@@ -50,9 +44,6 @@ services:
       snail-cluster-postgresql:
         condition: service_healthy
     container_name: snail-cluster-03
-    env_file:
-      - path: ../.env
-        required: true
     build:
       context: .
       dockerfile: ./Dockerfile-snail-job
@@ -72,9 +63,6 @@ services:
     image: snail-job-postgresql:13.18
     container_name: snail-cluster-postgresql
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     environment:
       POSTGRES_USER: "snail_job"
       POSTGRES_PASSWORD: "snail_job"
@@ -97,9 +85,6 @@ services:
     image: snail-job-mysql:9.1.0
     container_name: snail-cluster-mysql
     restart: unless-stopped
-    env_file:
-      - path: ../.env
-        required: true
     environment:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_DATABASE: "snail_job"
