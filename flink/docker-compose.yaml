@@ -1,0 +1,45 @@
+services:
+  jobmanager:
+    build:
+      context: .
+    user: flink:flink
+    container_name: jobmanager
+    ports:
+      - 8081:8081
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    command: jobmanager
+    networks: 
+      - flink_network
+
+  taskmanager-1:
+    build:
+      context: .
+    user: flink:flink
+    container_name: taskmanager-1
+    depends_on:
+      - jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - TASK_MANAGER_NUMBER_OF_TASK_SLOTS=4
+    command: taskmanager
+    networks: 
+      - flink_network
+      
+  taskmanager-2:
+    build:
+      context: .
+    user: flink:flink
+    container_name: taskmanager-2
+    depends_on:
+      - jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - TASK_MANAGER_NUMBER_OF_TASK_SLOTS=4
+    command: taskmanager
+    networks: 
+      - flink_network
+
+networks:
+  flink_network:
+    driver: bridge
