@@ -3,6 +3,9 @@ services:
     container_name: jellyfin
     image: linuxserver/jellyfin:latest
     restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: true
     environment:
       - PUID=1000
       - PGID=1000

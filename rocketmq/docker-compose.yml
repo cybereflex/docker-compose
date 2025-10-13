@@ -4,6 +4,9 @@ services:
     container_name: rocketmq-nameserver
     command: sh mqnamesrv
     restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: true
     environment:
       - JAVA_OPT=-Xms128m -Xmx128m -Xmn64m
       - NAMESRV_ADDR=rocketmq-nameserver:9876
@@ -29,6 +32,9 @@ services:
     container_name: rocketmq-broker
     command: sh mqbroker
     restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: true
     depends_on:
       rocketmq-nameserver:
         condition: service_healthy
@@ -63,6 +69,9 @@ services:
     container_name: rocketmq-proxy
     command: sh mqproxy
     restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: true
     networks:
       - rocketmq_network
     depends_on:

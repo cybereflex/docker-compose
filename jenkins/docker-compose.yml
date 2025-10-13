@@ -2,6 +2,10 @@ services:
   jenkins:
     container_name: jenkins
     image: jenkins/jenkins:latest
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: true
     ports:
       - 8888:8080
     volumes:

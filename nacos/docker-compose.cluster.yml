@@ -12,6 +12,9 @@ services:
       - "9849:9849"
     env_file:
       - ./env/nacos-cluster-hostname.env
+      - path: ../.env
+        required: true
+      
     depends_on:
       nacos-cluster-mysql:
         condition: service_healthy
@@ -31,6 +34,8 @@ services:
       - "19849:9849"
     env_file:
       - ./env/nacos-cluster-hostname.env
+      - path: ../.env
+        required: true
     depends_on:
       nacos-cluster-mysql:
         condition: service_healthy
@@ -50,6 +55,8 @@ services:
       - "29849:9849"
     env_file:
       - ./env/nacos-cluster-hostname.env
+      - path: ../.env
+        required: true
     depends_on:
       nacos-cluster-mysql:
         condition: service_healthy
@@ -64,6 +71,8 @@ services:
     image: nacos-mysql/mysql:5.7.44
     env_file:
       - ./env/mysql.env
+      - path: ../.env
+        required: true
     volumes:
       - nacos_cluster_mysql_data:/var/lib/mysql
     healthcheck:

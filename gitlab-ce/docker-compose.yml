@@ -3,10 +3,13 @@ services:
     image: gitlab/gitlab-ce:latest
     container_name: gitlab
     restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: true
     networks:
       - gitlab_network
     environment:
-      GITLAB_OMNIBUS_CONFIG: "external_url 'http://10.100.133.11:30080'"
+      GITLAB_OMNIBUS_CONFIG: "external_url 'http://${LOCAL_IP}:30080'"
     ports:
       - 30080:30080
       - 30443:30443

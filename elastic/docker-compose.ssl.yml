@@ -2,6 +2,11 @@ services:
   setup:
     container_name: setup
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    env_file:
+      - path: ../.env
+        required: true
+      - path: .env
+        required: true
     volumes:
       - es_certs:/usr/share/elasticsearch/config/certs
     networks:
@@ -69,6 +74,11 @@ services:
       setup:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    env_file:
+      - path: ../.env
+        required: true
+      - path: .env
+        required: true
     volumes:
       - es_certs:/usr/share/elasticsearch/config/certs
       - es_data_01:/usr/share/elasticsearch/data
@@ -116,6 +126,11 @@ services:
       setup:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    env_file:
+      - path: ../.env
+        required: true
+      - path: .env
+        required: true
     volumes:
       - es_certs:/usr/share/elasticsearch/config/certs
       - es_data_02:/usr/share/elasticsearch/data
@@ -163,6 +178,11 @@ services:
       setup:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    env_file:
+      - path: ../.env
+        required: true
+      - path: .env
+        required: true
     volumes:
       - es_certs:/usr/share/elasticsearch/config/certs
       - es_data_03:/usr/share/elasticsearch/data
@@ -214,6 +234,11 @@ services:
       es03:
         condition: service_healthy
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    env_file:
+      - path: ../.env
+        required: true
+      - path: .env
+        required: true
     volumes:
       - es_certs:/usr/share/kibana/config/certs
       - kibana_data:/usr/share/kibana/data
@@ -243,6 +268,11 @@ services:
       kibana:
         condition: service_healthy
     container_name: metricbeat
+    env_file:
+      - path: ../.env
+        required: true
+      - path: .env
+        required: true
     build:
       context: .
       dockerfile: ./metricbeat-ssl/Dockerfile
@@ -268,6 +298,11 @@ services:
         condition: service_healthy
     image: prometheuscommunity/elasticsearch-exporter:v1.8.0
     container_name: elasticsearch-exporter
+    env_file:
+      - path: ../.env
+        required: true
+      - path: .env
+        required: true
     user: root
     command:
       - "--es.uri=https://elastic:elastic@es01:9200"

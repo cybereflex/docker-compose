@@ -3,6 +3,9 @@ services:
     container_name: zk-01
     hostname: zk-01
     image: zookeeper:3.9.3
+    env_file:
+      - path: ../.env
+        required: true
     networks:
       - zookeeper_network
     ports:
@@ -18,6 +21,9 @@ services:
     container_name: zk-02
     hostname: zk-02
     image: zookeeper:3.9.3
+    env_file:
+      - path: ../.env
+        required: true
     networks:
       - zookeeper_network
     ports:
@@ -34,6 +40,9 @@ services:
     container_name: zk-03
     hostname: zk-03
     image: zookeeper:3.9.3
+    env_file:
+      - path: ../.env
+        required: true
     networks:
       - zookeeper_network
     ports:

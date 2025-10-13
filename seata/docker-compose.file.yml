@@ -3,6 +3,9 @@ services:
     container_name: seata-server
     image: apache/seata-server:2.2.0
     hostname: seata-server
+    env_file:
+      - path: ../.env
+        required: true
     ports:
       - "7091:7091"
       - "8091:8091"

@@ -3,6 +3,9 @@ services:
     image: sonatype/nexus3:3.76.1
     container_name: nexus
     restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: true
     ports:
       - 38081:8081  # web ui
       - 20000:20000 # used in docker-proxy
