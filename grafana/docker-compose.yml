@@ -21,10 +21,10 @@ services:
       - 9090:9090
     networks:
       - grafana_network
-      - mysqld_mysql_network
+      - mysql_mysql_network
       - postgresql_postgres_network
-      - rabbitmq_cluster_rabbitmq_cluster_network
-      - kafka_cluster_kafka_cluster_network
+      - rabbitmq_rabbitmq_cluster_network
+      - kafka_kafka_cluster_network
       - elastic_elastic_network
 
   alert-manager:
@@ -58,13 +58,13 @@ volumes:
 
 networks:
   grafana_network:
-  mysqld_mysql_network:
+  mysql_mysql_network:
     external: true
   postgresql_postgres_network:
     external: true
-  rabbitmq_cluster_rabbitmq_cluster_network:
+  rabbitmq_rabbitmq_cluster_network:
     external: true
-  kafka_cluster_kafka_cluster_network:
+  kafka_kafka_cluster_network:
     external: true
   elastic_elastic_network:
     external: true
