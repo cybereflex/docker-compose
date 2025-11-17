@@ -1,0 +1,180 @@
+services:
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    networks:
+      - nas_network
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=6881
+    volumes:
+      - qbittorrent_config:/config
+      - qbittorrent_downloads:/downloads
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/8080'",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  jellyfin:
+    image: nyanmisaka/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    ports:
+      - 8096:8096
+    networks:
+      - nas_network
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - jellyfin_cache:/cache
+      - jellyfin_config:/config
+      - jellyfin_media:/data/media
+    # devices:
+    #   - /dev/dri:/dev/dri
+
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    restart: unless-stopped
+    ports:
+      - 4533:4533
+    networks:
+      - nas_network
+    environment:
+      ND_SCANSCHEDULE: 24h
+      ND_LOGLEVEL: info
+    volumes:
+      - navidrome_data:/data
+      - navidrome_music:/music
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "nc",
+          "-z",
+          "localhost",
+          "4533"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  music-tag:
+    image: xhongc/music_tag_web:latest
+    container_name: music-tag
+    restart: unless-stopped
+    ports:
+      - 8001:8001
+    networks:
+      - nas_network
+    volumes:
+      - music_tag_data:/app/data
+      - music_tag_media:/app/media
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "timeout 1 bash -c 'echo > /dev/tcp/localhost/8001'",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  frpc:
+    image: fatedier/frpc:v0.65.0
+    container_name: frpc
+    restart: unless-stopped
+    command: ["-c", "/opt/frp/config/frpc.toml"]
+    depends_on:
+      qbittorrent:
+        condition: service_healthy
+      jellyfin:
+        condition: service_healthy
+      navidrome:
+        condition: service_healthy
+      music-tag:
+        condition: service_healthy
+    ports:
+      - 7500:7500
+    networks:
+      - nas_network
+    volumes:
+      - frp_config:/opt/frp/config
+
+networks:
+  nas_network:
+    driver: bridge
+
+volumes:
+  qbittorrent_config:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/qbittorrent/config
+  qbittorrent_downloads:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/qbittorrent/downloads
+  jellyfin_cache:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/jellyfin/cache
+  jellyfin_config:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/jellyfin/config
+  jellyfin_media:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/jellyfin/media
+  navidrome_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/navidrome/data
+  navidrome_music:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/navidrome/music
+  music_tag_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/music-tag/data
+  music_tag_media:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/music-tag/media
+  frp_config:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/docker/volumes/frp/config
