@@ -34,6 +34,8 @@ services:
     container_name: frps
     restart: unless-stopped
     command: ["-c", "/opt/frp/config/frps.toml"]
+    ports:
+      - 7000:7000
     networks:
       - server_network
     volumes:
