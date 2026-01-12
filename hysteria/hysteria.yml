@@ -1,0 +1,21 @@
+listen: :443
+
+acme:
+  domains:
+    - example.com
+  email: example@gmail.com
+  type: dns
+  dns: 
+    name: cloudflare
+    config:
+      cloudflare_api_token: Dxabckw9dB_jYBdi89kgyaS8wRjqqSsd679urScKOBP
+
+auth:
+  type: password
+  password: Se7RAuFZ8Lzg
+
+masquerade:
+  type: proxy
+  proxy:
+    url: https://www.microsoft.com/
+    rewriteHost: true
