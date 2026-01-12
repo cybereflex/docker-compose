@@ -1,0 +1,19 @@
+services:
+  srs:
+    image: ossrs/srs:6
+    container_name: srs
+    restart: unless-stopped
+    environment:
+      CANDIDATE: 172.22.36.195
+    networks:
+      - default-network
+    ports:
+      - 1935:1935
+      - 1985:1985
+      - 1990:1990
+      - 8080:8080
+      - 8000:8000/udp
+    command: ["./objs/srs", "-c", "conf/rtmp2rtc.conf"]
+
+networks:
+  default-network:
