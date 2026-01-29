@@ -1,0 +1,22 @@
+services:
+  ollama:
+    image: ghcr.io/ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 11434:11434
+    volumes:
+      - ollama-data:/root/.ollama
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    environment:
+      OLLAMA_VULKAN: 1
+
+volumes:
+  ollama-data:
+
+networks:
+  default-network:

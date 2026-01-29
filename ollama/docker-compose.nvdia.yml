@@ -1,0 +1,24 @@
+services:
+  ollama:
+    image: ghcr.io/ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    networks:
+      - default-network
+    ports:
+      - 11434:11434
+    volumes:
+      - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+volumes:
+  ollama-data:
+
+networks:
+  default-network:
