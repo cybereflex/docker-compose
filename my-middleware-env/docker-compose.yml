@@ -143,18 +143,6 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - es-data:/usr/share/elasticsearch/data
 
-  env-hive2:
-    image: apache/hive:4.2.0
-    container_name: env-hive2
-    restart: unless-stopped
-    environment:
-      SERVICE_NAME: hiveserver2
-    ports:
-      - 10000:10000
-      - 10002:10002
-    networks:
-      - default-network
-
   env-nginx:
     image: nginx:latest
     container_name: env-nginx
@@ -165,6 +153,18 @@ services:
     volumes:
       - nginx-html:/usr/share/nginx/html
       - nginx-conf:/etc/nginx/conf.d
+    networks:
+      - default-network
+  
+  env-zipkin:
+    image: openzipkin/zipkin-slim:3.5
+    container_name: zipkin-mem
+    restart: unless-stopped
+    environment:
+      STORAGE_TYPE: mem
+      JAVA_OPTS: "-Xms128m -Xmx128m -XX:+ExitOnOutOfMemoryError"
+    ports:
+      - 9411:9411
     networks:
       - default-network
 
