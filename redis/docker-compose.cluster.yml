@@ -19,6 +19,11 @@ services:
       - "--cluster-enabled yes"
       - "--cluster-announce-ip redis-cluster-01"
       - "--cluster-announce-port 36379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "36379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis-cluster-02:
     image: redis:7.4.1
@@ -40,6 +45,11 @@ services:
       - "--cluster-enabled yes"
       - "--cluster-announce-ip redis-cluster-02"
       - "--cluster-announce-port 36380"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "36380", "ping"]
+      interval: 10s 
+      timeout: 5s
+      retries: 5
 
   redis-cluster-03:
     image: redis:7.4.1
@@ -61,6 +71,35 @@ services:
       - "--cluster-enabled yes"
       - "--cluster-announce-ip redis-cluster-03"
       - "--cluster-announce-port 36381"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "36381", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-cluster-setup:
+    image: redis:7.4.1
+    container_name: redis-cluster-setup
+    depends_on:
+      redis-cluster-01:
+        condition: service_healthy
+      redis-cluster-02:
+        condition: service_healthy
+      redis-cluster-03:
+        condition: service_healthy
+    networks:
+      - default-network
+    command:
+      - "redis-cli"
+      - "--cluster" 
+      - "create"
+      - "redis-cluster-01:36379" 
+      - "redis-cluster-02:36380"
+      - "redis-cluster-03:36381"
+      - "--cluster-replicas" 
+      - "0"
+      - "--cluster-yes"
+      
 
 networks:
   default-network:

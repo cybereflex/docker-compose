@@ -54,7 +54,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-01:9091
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://172.22.36.195:9091
       KAFKA_ZOOKEEPER_CONNECT: kafka-zk-01:2181,kafka-zk-02:2182,kafka-zk-03:2183
       KAFKA_LOG4J_LOGGERS: kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO
       KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
@@ -83,7 +83,7 @@ services:
       KAFKA_BROKER_ID: 2
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-02:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://172.22.36.195:9092
       KAFKA_ZOOKEEPER_CONNECT: kafka-zk-01:2181,kafka-zk-02:2182,kafka-zk-03:2183
       KAFKA_LOG4J_LOGGERS: kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO
       KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
@@ -112,7 +112,7 @@ services:
       KAFKA_BROKER_ID: 3
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-03:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://172.22.36.195:9093
       KAFKA_ZOOKEEPER_CONNECT: kafka-zk-01:2181,kafka-zk-02:2182,kafka-zk-03:2183
       KAFKA_LOG4J_LOGGERS: kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO
       KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
