@@ -68,38 +68,9 @@ services:
     networks:
       - default-network
 
-  rabbitmq-cluster-01:
+  rabbitmq:
     image: rabbitmq:4.0.5-management
-    container_name: rabbitmq-cluster-01
-    restart: unless-stopped
-    ports:
-      - 15671:15672
-      - 5671:5672
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-      RABBITMQ_ERLANG_COOKIE: secret
-      RABBITMQ_NODENAME: rabbitmq@rabbitmq-cluster-01
-    command: >
-      bash -c "
-        rabbitmq-plugins enable rabbitmq_mqtt && 
-        rabbitmq-plugins enable rabbitmq_stream &&
-        rabbitmq-server
-      "
-    volumes:
-      - rabbitmq-cluster-01-data:/var/lib/rabbitmq
-    networks:
-      - default-network
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
-  rabbitmq-cluster-02:
-    image: rabbitmq:4.0.5-management
-    container_name: rabbitmq-cluster-02
+    container_name: rabbitmq
     restart: unless-stopped
     ports:
       - 15672:15672
@@ -108,7 +79,6 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
       RABBITMQ_ERLANG_COOKIE: secret
-      RABBITMQ_NODENAME: rabbitmq@rabbitmq-cluster-02
     command: >
       bash -c "
         rabbitmq-plugins enable rabbitmq_mqtt && 
@@ -116,7 +86,7 @@ services:
         rabbitmq-server
       "
     volumes:
-      - rabbitmq-cluster-02-data:/var/lib/rabbitmq
+      - rabbitmq-data:/var/lib/rabbitmq
     networks:
       - default-network
     healthcheck:
@@ -125,175 +95,38 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-
-  rabbitmq-cluster-03:
-    image: rabbitmq:4.0.5-management
-    container_name: rabbitmq-cluster-03
-    restart: unless-stopped
-    ports:
-      - 15673:15672
-      - 5673:5672
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-      RABBITMQ_ERLANG_COOKIE: secret
-      RABBITMQ_NODENAME: rabbitmq@rabbitmq-cluster-03
-    command: >
-      bash -c "
-        rabbitmq-plugins enable rabbitmq_mqtt && 
-        rabbitmq-plugins enable rabbitmq_stream &&
-        rabbitmq-server
-      "
-    volumes:
-      - rabbitmq-cluster-03-data:/var/lib/rabbitmq
-    networks:
-      - default-network
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
-  rabbitmq-cluster-setup:
-    image: rabbitmq:4.0.5-management
-    container_name: rabbitmq-cluster-setup
-    depends_on:
-      rabbitmq-cluster-01:
-        condition: service_healthy
-      rabbitmq-cluster-02:
-        condition: service_healthy
-      rabbitmq-cluster-03:
-        condition: service_healthy
-    environment:
-      RABBITMQ_ERLANG_COOKIE: secret
-    command: >
-      bash -c "
-        sleep 5 &&
-
-        rabbitmqctl -n rabbitmq@rabbitmq-cluster-02 stop_app &&
-        rabbitmqctl -n rabbitmq@rabbitmq-cluster-02 join_cluster rabbitmq@rabbitmq-cluster-01 &&
-        rabbitmqctl -n rabbitmq@rabbitmq-cluster-02 start_app &&
-
-        rabbitmqctl -n rabbitmq@rabbitmq-cluster-03 stop_app &&
-        rabbitmqctl -n rabbitmq@rabbitmq-cluster-03 join_cluster rabbitmq@rabbitmq-cluster-01 &&
-        rabbitmqctl -n rabbitmq@rabbitmq-cluster-03 start_app &&
-
-        echo 'initial rabbitmq cluster success...'
-      "
-    networks:
-      - default-network
-    volumes:
-      - rabbitmq-cluster-setup-data:/var/lib/rabbitmq
   
-  kafka-kraft-01:
+  kafka:
     image: apache/kafka:4.2.0
-    container_name: kafka-kraft-01
-    hostname: kafka-kraft-01
-    restart: unless-stopped
-    ports:
-      - 9091:9091
-    networks:
-      - default-network
-    volumes:
-      - kafka-kraft-01-data:/var/lib/kafka/data
-      - kafka-kraft-01-secrets:/etc/kafka/secrets
-      - kafka-kraft-01-conf:/mnt/shared/config
-    environment:
-      CLUSTER_ID: kraft-docker
-      KAFKA_NODE_ID: 1
-      KAFKA_BROKER_ID: 1
-      KAFKA_PROCESS_ROLES: controller,broker
-      KAFKA_LISTENERS: CONTROLLER://0.0.0.0:19091,PLAINTEXT://0.0.0.0:9091
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://172.22.36.195:9091
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-kraft-01:19091,2@kafka-kraft-02:19092,3@kafka-kraft-03:19093
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
-      KAFKA_MIN_INSYNC_REPLICAS: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-    healthcheck:
-      test: ["CMD", "nc", "-vz", "localhost", "9091"]
-      interval: 1m30s
-      timeout: 30s
-      retries: 5
-      start_period: 30s
-
-
-  kafka-kraft-02:
-    image: apache/kafka:4.2.0
-    container_name: kafka-kraft-02
-    hostname: kafka-kraft-02
+    container_name: kafka
     restart: unless-stopped
     ports:
       - 9092:9092
     networks:
       - default-network
     volumes:
-      - kafka-kraft-02-data:/var/lib/kafka/data
-      - kafka-kraft-02-secrets:/etc/kafka/secrets
-      - kafka-kraft-02-conf:/mnt/shared/config
+      - kafka-data:/var/lib/kafka/data
+      - kafka-secrets:/etc/kafka/secrets
+      - kafka-conf:/mnt/shared/config
     environment:
-      CLUSTER_ID: kraft-docker
-      KAFKA_NODE_ID: 2
-      KAFKA_BROKER_ID: 2
-      KAFKA_PROCESS_ROLES: controller,broker
-      KAFKA_LISTENERS: CONTROLLER://0.0.0.0:19092,PLAINTEXT://0.0.0.0:9092
+      CLUSTER_ID: kafka
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: CONTROLLER://:19092,PLAINTEXT://:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://172.22.36.195:9092
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-kraft-01:19091,2@kafka-kraft-02:19092,3@kafka-kraft-03:19093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:19092
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
-      KAFKA_MIN_INSYNC_REPLICAS: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     healthcheck:
       test: ["CMD", "nc", "-vz", "localhost", "9092"]
-      interval: 1m30s
-      timeout: 30s
-      retries: 5
-      start_period: 30s
-
-  kafka-kraft-03:
-    image: apache/kafka:4.2.0
-    container_name: kafka-kraft-03
-    hostname: kafka-kraft-03
-    restart: unless-stopped
-    ports:
-      - 9093:9093
-    networks:
-      - default-network
-    volumes:
-      - kafka-kraft-03-data:/var/lib/kafka/data
-      - kafka-kraft-03-secrets:/etc/kafka/secrets
-      - kafka-kraft-03-conf:/mnt/shared/config
-    environment:
-      CLUSTER_ID: kraft-docker
-      KAFKA_NODE_ID: 3
-      KAFKA_BROKER_ID: 3
-      KAFKA_PROCESS_ROLES: controller,broker
-      KAFKA_LISTENERS: CONTROLLER://0.0.0.0:19093,PLAINTEXT://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://172.22.36.195:9093
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-kraft-01:19091,2@kafka-kraft-02:19092,3@kafka-kraft-03:19093
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
-      KAFKA_MIN_INSYNC_REPLICAS: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-    healthcheck:
-      test: ["CMD", "nc", "-vz", "localhost", "9093"]
-      interval: 1m30s
+      interval: 30s
       timeout: 30s
       retries: 5
       start_period: 30s
@@ -303,11 +136,7 @@ services:
     restart: unless-stopped
     container_name: kafbat-ui
     depends_on:
-      kafka-kraft-01:
-        condition: service_healthy
-      kafka-kraft-02:
-        condition: service_healthy
-      kafka-kraft-03:
+      kafka:
         condition: service_healthy
     networks:
       - default-network
@@ -315,88 +144,24 @@ services:
       - 8080:8080
     environment:
       DYNAMIC_CONFIG_ENABLED: true
-      KAFKA_CLUSTERS_0_NAME: kafka-kraft-docker
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-kraft-01:9091,kafka-kraft-02:9092,kafka-kraft-03:9093
+      KAFKA_CLUSTERS_0_NAME: kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
 
-  es-cluster-01:
-    container_name: es-cluster-01
+  elasticsearch:
+    container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:9.4.1
     restart: unless-stopped
     volumes:
-      - es-cluster-01-data:/usr/share/elasticsearch/data
+      - elasticsearch-data:/usr/share/elasticsearch/data
     networks:
       - default-network
     ports:
       - 9200:9200
     environment:
-      node.name: es-cluster-01
-      cluster.name: elastic-cluster-docker
-      cluster.initial_master_nodes: es-cluster-01,es-cluster-02,es-cluster-03
-      discovery.seed_hosts: es-cluster-02,es-cluster-03
-      bootstrap.memory_lock: true
-      xpack.security.enabled: false
-      xpack.license.self_generated.type: basic
-      xpack.ml.use_auto_machine_memory_percent: true
-      ELASTIC_PASSWORD: elastic
-    mem_limit: 1073741824
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    healthcheck:
-      test: ["CMD", "nc", "-vz", "localhost", "9200"]
-      interval: 30s
-      timeout: 15s
-      retries: 5
-      start_period: 30s
-
-  es-cluster-02:
-    container_name: es-cluster-02
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.1
-    restart: unless-stopped
-    volumes:
-      - es-cluster-02-data:/usr/share/elasticsearch/data
-    networks:
-      - default-network
-    ports:
-      - 9300:9200
-    environment:
-      node.name: es-cluster-02
-      cluster.name: elastic-cluster-docker
-      cluster.initial_master_nodes: es-cluster-01,es-cluster-02,es-cluster-03
-      discovery.seed_hosts: es-cluster-01,es-cluster-03
-      bootstrap.memory_lock: true
-      xpack.security.enabled: false
-      xpack.license.self_generated.type: basic
-      xpack.ml.use_auto_machine_memory_percent: true
-      ELASTIC_PASSWORD: elastic
-    mem_limit: 1073741824
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    healthcheck:
-      test: ["CMD", "nc", "-vz", "localhost", "9200"]
-      interval: 30s
-      timeout: 15s
-      retries: 5
-      start_period: 30s
-
-  es-cluster-03:
-    container_name: es-cluster-03
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.1
-    restart: unless-stopped
-    volumes:
-      - es-cluster-03-data:/usr/share/elasticsearch/data
-    networks:
-      - default-network
-    ports:
-      - 9400:9200
-    environment:
-      node.name: es-cluster-03
-      cluster.name: elastic-cluster-docker
-      cluster.initial_master_nodes: es-cluster-01,es-cluster-02,es-cluster-03
-      discovery.seed_hosts: es-cluster-01,es-cluster-02
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      node.name: elasticsearch
+      cluster.name: elasticsearch
       bootstrap.memory_lock: true
       xpack.security.enabled: false
       xpack.license.self_generated.type: basic
@@ -419,11 +184,7 @@ services:
     image: docker.elastic.co/kibana/kibana:9.4.1
     restart: unless-stopped
     depends_on:
-      es-cluster-01:
-        condition: service_healthy
-      es-cluster-02:
-        condition: service_healthy
-      es-cluster-03:
+      elasticsearch:
         condition: service_healthy
     volumes:
       - kibana-data:/usr/share/kibana/data
@@ -433,7 +194,7 @@ services:
       - 5601:5601
     environment:
       SERVERNAME: kibana
-      ELASTICSEARCH_HOSTS: '["http://es-cluster-01:9200","http://es-cluster-02:9200","http://es-cluster-03:9200"]'
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
       ELASTICSEARCH_USERNAME: kibana
       ELASTICSEARCH_PASSWORD: kibana
     mem_limit: 1073741824
@@ -457,11 +218,7 @@ services:
       - 5044:5044
       - 12000:12000
     depends_on:
-      es-cluster-01:
-        condition: service_healthy
-      es-cluster-02:
-        condition: service_healthy
-      es-cluster-03:
+      elasticsearch:
         condition: service_healthy
     user: root
     environment:
@@ -469,7 +226,32 @@ services:
       LOGSTASH_INTERNAL_PASSWORD: elastic
     networks:
       - default-network
-  
+
+  seata-server:
+    container_name: seata-server
+    image: apache/seata-server:2.2.0
+    restart: unless-stopped
+    ports:
+      - 7091:7091
+      - 8091:8091
+    environment:
+      STORE_MODE: file
+      SEATA_PORT: 8091
+    networks:
+      - default-network
+
+  sentinel:
+    build: 
+      context: ./sentinel
+      dockerfile: Dockerfile
+    image: sentinel:1.8.9
+    container_name: sentinel
+    restart: unless-stopped
+    ports:
+      - 15566:15566
+    networks:
+      - default-network
+
   otel-collector:
     image: otel/opentelemetry-collector:latest
     container_name: otel-collector
@@ -526,21 +308,10 @@ volumes:
   mongodb-logs:
   oracledb-data:
   redis-data:
-  rabbitmq-cluster-01-data:
-  rabbitmq-cluster-02-data:
-  rabbitmq-cluster-03-data:
-  rabbitmq-cluster-setup-data:
-  kafka-kraft-01-data:
-  kafka-kraft-01-secrets:
-  kafka-kraft-01-conf:
-  kafka-kraft-02-data:
-  kafka-kraft-02-secrets:
-  kafka-kraft-02-conf:
-  kafka-kraft-03-data:
-  kafka-kraft-03-secrets:
-  kafka-kraft-03-conf:
-  es-cluster-01-data:
-  es-cluster-02-data:
-  es-cluster-03-data:
+  rabbitmq-data:
+  kafka-data:
+  kafka-secrets:
+  kafka-conf:
+  elasticsearch-data:
   kibana-data:
   prometheus-data:
